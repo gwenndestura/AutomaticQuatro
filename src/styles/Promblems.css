@@ -1,0 +1,105 @@
+/* Container */
+.problem-input-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+/* Selector layout */
+.problem-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Radio card */
+.radio-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+  background: #fafafa;
+}
+
+/* Hover effect */
+.radio-card:hover {
+  border-color: #4CAF50;
+  background: #f4fbf6;
+}
+
+/* Hide default radio */
+.radio-card input {
+  display: none;
+}
+
+/* Custom radio circle */
+.radio-custom {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #bbb;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Selected state */
+.radio-card input:checked + .radio-custom {
+  border-color: #4CAF50;
+  background-color: #4CAF50;
+}
+
+/* Inner dot */
+.radio-card input:checked + .radio-custom::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Label text */
+.label-text {
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+/* Active card highlight */
+.radio-card input:checked ~ .label-text {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+/* Dark Mode Overrides */
+body.dark-mode .radio-card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+body.dark-mode .radio-card:hover {
+  background: #334155;
+  border-color: #4CAF50;
+}
+
+body.dark-mode .radio-custom {
+  border-color: #64748b;
+}
+
+body.dark-mode .radio-card input:checked + .radio-custom {
+  border-color: #4CAF50;
+}
+
+body.dark-mode .radio-card input:checked ~ .label-text {
+  color: #4CAF50;
+}

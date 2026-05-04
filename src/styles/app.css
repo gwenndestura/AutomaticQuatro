@@ -1,0 +1,262 @@
+html, body {
+  margin: 0;
+  font-size: 1.15rem;
+  overflow-x: hidden; /* Prevents whole page horizontal scroll */
+  width: 100%;
+}
+
+h1 { font-size: 2.2rem; }
+
+/* 🔥 FIX: remove default margins causing gap */
+h2 {
+  font-size: 1.8rem;
+  margin: 0 0 8px 0;
+}
+
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.3rem; }
+
+/* Section spacing */
+.section {
+  padding: 0.5rem;
+  margin: 0;
+}
+
+/* 🔥 Main layout */
+.problem-input-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* 🔥 Prevent stretching + align tops */
+.problems-section,
+.input-section {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔥 MATCH BOTH SIDES */
+.input-section,
+.problems-section {
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .problem-input-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .problems-section,
+  .input-section {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .section h2 {
+    text-align: center;
+  }
+  
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+}
+
+/* Titles */
+.main-title {
+  text-align: center;
+}
+
+.main-title p {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .main-title p {
+    font-size: 1.2rem;
+    padding: 0 16px;
+  }
+}
+
+/* Global styles */
+* {
+  scrollbar-width: thin;
+  font-family: monospace !important;
+}
+
+/* Hide horizontal scrollbar */
+.no-scrollbar-x {
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* Containers */
+.dfa-wrap,
+.cfg-wrap,
+.pda-wrap,
+.manual-plain,
+.sections-container {
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dfa-wrap::-webkit-scrollbar,
+.cfg-wrap::-webkit-scrollbar,
+.pda-wrap::-webkit-scrollbar,
+.manual-plain::-webkit-scrollbar,
+.sections-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Center and fit width for visualization cards on mobile */
+@media (max-width: 950px) {
+  .dfa-wrap,
+  .cfg-wrap,
+  .pda-wrap,
+  .manual-plain,
+  .sections-container {
+    width: 95%;
+    max-width: 900px;
+    margin: 20px auto;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 600px) {
+  .dfa-wrap,
+  .cfg-wrap,
+  .pda-wrap {
+    width: 98%;
+    padding: 10px;
+    margin: 10px auto;
+  }
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode p {
+  color: #f1f5f9;
+}
+
+body.dark-mode .main-title p {
+  color: #cbd5e1;
+}
+
+/* Ensure the white cards stay white in dark mode */
+body.dark-mode .dfa-wrap,
+body.dark-mode .cfg-wrap,
+body.dark-mode .pda-wrap {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body.dark-mode .dfa-wrap h2,
+body.dark-mode .cfg-wrap h2,
+body.dark-mode .pda-wrap h2,
+body.dark-mode .dfa-wrap p,
+body.dark-mode .cfg-wrap p,
+body.dark-mode .pda-wrap p {
+  color: #000000;
+}
+
+body.dark-mode .visualization-controls button {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+body.dark-mode .visualization-controls button:hover {
+  background: #475569;
+}
+
+body.dark-mode .visualization-controls button.active {
+  background: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+/* --- NavBar Global Dark Mode --- */
+body.dark-mode .navbar {
+  background: #0f172a; 
+  border-bottom-color: #1e293b;
+}
+
+body.dark-mode .nav-title {
+  color: #f8fafc;
+}
+
+body.dark-mode .nav-buttons .btn {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+body.dark-mode .nav-buttons .btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .nav-buttons .btn.active {
+  background: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+/* --- User Manual Global Dark Mode --- */
+body.dark-mode .manual-plain {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+body.dark-mode .manual-plain h1,
+body.dark-mode .manual-plain h2 {
+  border-bottom-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .manual-plain h3 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .manual-plain hr {
+  border-top-color: #334155;
+}
+
+body.dark-mode .manual-plain strong {
+  color: #f8fafc;
+}
+
+body.dark-mode .doc-link {
+  color: #60a5fa;
+}
+
+body.dark-mode .doc-link:hover {
+  color: #93c5fd;
+}
