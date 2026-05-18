@@ -1,11 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const emit = defineEmits(['change-view'])
+const emit = defineEmits(['change-view', 'change-automata'])
 
-// default active view
-const active = ref('regex')
-
+const active     = ref('simulator')
 const isDarkMode = ref(false)
 
 const changeView = (view) => {
@@ -15,136 +13,167 @@ const changeView = (view) => {
 
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
-  if (isDarkMode.value) {
-    document.body.classList.add('dark-mode')
-  } else {
-    document.body.classList.remove('dark-mode')
-  }
+  document.body.classList.toggle('dark-mode', isDarkMode.value)
 }
 
 onMounted(() => {
-  if (document.body.classList.contains('dark-mode')) {
-    isDarkMode.value = true
-  }
+  isDarkMode.value = document.body.classList.contains('dark-mode')
 })
 </script>
 
 <template>
   <nav class="navbar">
 
-    <!-- TITLE -->
-    <div class="nav-title">
-      automata-theory project
+    <!-- Brand -->
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="14" cy="14" r="12.5" stroke="#4caf50" stroke-width="2"/>
+        <circle cx="14" cy="14" r="3.5" fill="#4caf50"/>
+        <line x1="14" y1="1.5" x2="14" y2="6.5"  stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="14" y1="21.5" x2="14" y2="26.5" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="1.5" y1="14" x2="6.5" y2="14"   stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="21.5" y1="14" x2="26.5" y2="14" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Automata Simulator</span>
     </div>
 
-    <!-- BUTTONS -->
-    <div class="nav-buttons">
-      <button class="btn dark-mode-toggle" @click="toggleDarkMode" title="Toggle Dark Mode">
-        {{ isDarkMode ? '☀️' : '🌙' }}
-      </button>
-
+    <!-- Nav tabs -->
+    <div class="nav-tabs" role="tablist">
       <button
-        :class="['btn', active === 'regex' ? 'active' : '']"
-        @click="changeView('regex')"
+        role="tab"
+        :aria-selected="active === 'simulator'"
+        :class="['nav-tab', active === 'simulator' ? 'nav-tab--active' : '']"
+        @click="changeView('simulator')"
       >
-        Automata Simulator
+        <span class="tab-label">Simulations</span>
       </button>
-
       <button
-        :class="['btn', active === 'manual' ? 'active' : '']"
+        role="tab"
+        :aria-selected="active === 'manual'"
+        :class="['nav-tab', active === 'manual' ? 'nav-tab--active' : '']"
         @click="changeView('manual')"
       >
-        User Manual
+        <span class="tab-label">User Manual</span>
       </button>
     </div>
+
+    <!-- Dark mode toggle -->
+    <button class="dark-btn" :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleDarkMode">
+      <svg v-if="!isDarkMode" width="15" height="15" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z"/>
+      </svg>
+      <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1"  x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
 
   </nav>
 </template>
 
 <style scoped>
-/* NAVBAR CONTAINER */
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 60px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  transition: background-color 0.3s, border-color 0.3s;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: #111f14;
+  border-bottom: 1px solid #1e3323;
 }
 
-/* TITLE */
-.nav-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  transition: color 0.3s;
-}
-
-/* BUTTON GROUP */
-.nav-buttons {
+/* Brand */
+.brand {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 9px;
+}
+.brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #d6edd9;
+  letter-spacing: -0.01em;
 }
 
-/* BASE BUTTON (matches your gray DFA buttons) */
-.btn {
-  padding: 7px 16px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 13px;
+/* Tabs */
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 4px;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  height: 100%;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #5a8060;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.15s;
   white-space: nowrap;
 }
-
-/* HOVER */
-.btn:hover {
-  background: #e2e8f0;
+.nav-tab:hover {
+  color: #9dc4a2;
+}
+.nav-tab--active {
+  color: #4caf50;
 }
 
-/* ACTIVE (matches your green DFA button) */
-.btn.active {
-  background: #4caf50;
-  color: white;
-  border-color: #4caf50;
+/* Underline sits right under the text */
+.tab-label {
+  padding-bottom: 3px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+.nav-tab--active .tab-label {
+  border-bottom-color: #4caf50;
+}
+.nav-tab:hover:not(.nav-tab--active) .tab-label {
+  border-bottom-color: #3d6645;
 }
 
-/* CLICK FEEDBACK */
-.btn:active {
-  transform: scale(0.96);
+/* Dark mode toggle */
+.dark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: #5a8060;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.dark-btn:hover {
+  color: #9dc4a2;
+  background: #1a2e1d;
+  border-color: #1e3323;
 }
 
-.dark-mode-toggle {
-  padding: 7px 12px;
-  font-size: 14px;
-}
-
-@media (max-width: 640px) {
-  .navbar {
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px 20px;
-    text-align: center;
-  }
-
-  .nav-buttons {
-    width: 100%;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  .btn {
-    flex: 1;
-    padding: 8px 10px;
-    font-size: 12px;
-    text-align: center;
-  }
-  
-  .dark-mode-toggle {
-    flex: 0;
-  }
+/* Responsive */
+@media (max-width: 600px) {
+  .navbar { padding: 0 12px; }
+  .brand-name { display: none; }
+  .nav-tab { padding: 0 10px; font-size: 11px; }
 }
 </style>

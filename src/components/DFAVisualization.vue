@@ -18,103 +18,120 @@ const autoTimer = ref(null)
 const DFA_CONFIGS = {
   1: {
     start: 'q0',
-    accept: ['q8'],
+    accept: ['q9'],
     nodes: [
-      { id: 'q0', label: '-', type: 'start', fx: 0, fy: 0 },
-      { id: 'q1', label: '', type: 'state', fx: 150, fy: -80 },
-      { id: 'q2', label: '', type: 'state', fx: 150, fy: 80 },
-      { id: 'q3', label: '', type: 'state', fx: 300, fy: -80 },
-      { id: 'q4', label: '', type: 'state', fx: 450, fy: -80 },
-      { id: 'q5', label: '', type: 'state', fx: 300, fy: 80 },
-      { id: 'q6', label: '', type: 'state', fx: 450, fy: 80 },
-      { id: 'q7', label: '', type: 'state', fx: 600, fy: 0 },
-      { id: 'q8', label: '+', type: 'accept', fx: 750, fy: 0 }
+      { id: 'q0',  label: '-', type: 'start',  fx: 0,    fy: 0 },
+      { id: 'qT1', label: 'T', type: 'trap',   fx: 0,    fy: 220 },
+      { id: 'q1',  label: '',  type: 'state',  fx: 200,  fy: 0 },
+      { id: 'q2',  label: '',  type: 'state',  fx: 360,  fy: -110 },
+      { id: 'qT2', label: 'T', type: 'trap',   fx: 360,  fy: -280 },
+      { id: 'q3',  label: '',  type: 'state',  fx: 360,  fy: 110 },
+      { id: 'qT3', label: 'T', type: 'trap',   fx: 360,  fy: 290 },
+      { id: 'q4',  label: '',  type: 'state',  fx: 540,  fy: 60 },
+      { id: 'q5',  label: '',  type: 'state',  fx: 700,  fy: -90 },
+      { id: 'q6',  label: '',  type: 'state',  fx: 860,  fy: 60 },
+      { id: 'q7',  label: '',  type: 'state',  fx: 860,  fy: 220 },
+      { id: 'q8',  label: '',  type: 'state',  fx: 1020, fy: -90 },
+      { id: 'q9',  label: '+', type: 'accept', fx: 1180, fy: 0 }
     ],
     links: [
-      { source: 'q0', target: 'q1', label: 'a' },
-      { source: 'q0', target: 'q2', label: 'b' },
-      { source: 'q1', target: 'q2', label: 'a', curve: 1, sweep: 0},
-      { source: 'q1', target: 'q2', label: 'b', curve: 1, sweep: 1},
-      { source: 'q2', target: 'q3', label: 'a' },
-      { source: 'q2', target: 'q5', label: 'b' },
-      { source: 'q3', target: 'q4', label: 'a' },
-      { source: 'q3', target: 'q5', label: 'b', curve: 1, sweep: 0 },
-      { source: 'q4', target: 'q7', label: 'a' },
-      { source: 'q4', target: 'q5', label: 'b' },
-      { source: 'q5', target: 'q3', label: 'a' },
-      { source: 'q5', target: 'q6', label: 'b' },
-      { source: 'q6', target: 'q3', label: 'a' },
-      { source: 'q6', target: 'q7', label: 'b' },
-      { source: 'q7', target: 'q8', label: 'a', curve: 1, sweep: 0},
-      { source: 'q7', target: 'q8', label: 'b', curve: 1, sweep: 1},
-      { source: 'q8', target: 'q8', label: 'a, b' }
+      { source: 'q0',  target: 'q1',  label: 'b' },
+      { source: 'q0',  target: 'qT1', label: 'a' },
+      { source: 'qT1', target: 'qT1', label: 'a, b' },
+      { source: 'q1',  target: 'q2',  label: 'a' },
+      { source: 'q1',  target: 'q3',  label: 'b' },
+      { source: 'q2',  target: 'q4',  label: 'b' },
+      { source: 'q2',  target: 'qT2', label: 'a' },
+      { source: 'qT2', target: 'qT2', label: 'a, b' },
+      { source: 'q3',  target: 'q4',  label: 'b' },
+      { source: 'q3',  target: 'qT3', label: 'a' },
+      { source: 'qT3', target: 'qT3', label: 'a, b' },
+      { source: 'q4',  target: 'q5',  label: 'a' },
+      { source: 'q4',  target: 'q4',  label: 'b' },
+      { source: 'q5',  target: 'q5',  label: 'a' },
+      { source: 'q5',  target: 'q6',  label: 'b' },
+      { source: 'q6',  target: 'q7',  label: 'a', curve: 10001 },
+      { source: 'q6',  target: 'q4',  label: 'b', curve: 1.4, sweep: 1 },
+      { source: 'q7',  target: 'q5',  label: 'a', curve: 1.3, sweep: 0 },
+      { source: 'q7',  target: 'q8',  label: 'b' },
+      { source: 'q8',  target: 'q5',  label: 'a', curve: 1.4, sweep: 0 },
+      { source: 'q8',  target: 'q9',  label: 'b' },
+      { source: 'q9',  target: 'q9',  label: 'a, b' }
     ],
     transitions: {
-      q0: { a: 'q1', b: 'q2' },
-      q1: { a: 'q2', b: 'q2' },
-      q2: { a: 'q3', b: 'q5' },
-      q3: { a: 'q4', b: 'q5' },
-      q4: { a: 'q7', b: 'q5' },
-      q5: { a: 'q3', b: 'q6' },
-      q6: { a: 'q3', b: 'q7' },
-      q7: { a: 'q8', b: 'q8' },
-      q8: { a: 'q8', b: 'q8' }
+      q0:  { a: 'qT1', b: 'q1' },
+      qT1: { 'a, b': 'qT1' },
+      q1:  { a: 'q2',  b: 'q3' },
+      q2:  { a: 'qT2', b: 'q4' },
+      qT2: { 'a, b': 'qT2' },
+      q3:  { a: 'qT3', b: 'q4' },
+      qT3: { 'a, b': 'qT3' },
+      q4:  { a: 'q5',  b: 'q4' },
+      q5:  { a: 'q5',  b: 'q6' },
+      q6:  { a: 'q7',  b: 'q4' },
+      q7:  { a: 'q5',  b: 'q8' },
+      q8:  { a: 'q5',  b: 'q9' },
+      q9:  { 'a, b': 'q9' }
     }
   },
   2: {
     start: 'p0',
-    accept: ['p9'],
+    accept: ['p10'],
     nodes: [
-      { id: 'p0', label: '-', type: 'start', fx: 0, fy: 0 },
-      { id: 'p1', label: '', type: 'state', fx: 150, fy: -100 },
-      { id: 'p2', label: '', type: 'state', fx: 150, fy: 100 },
-      { id: 'p3', label: '', type: 'state', fx: 300, fy: -150 },
-      { id: 'p4', label: '', type: 'state', fx: 300, fy: 100 },
-      { id: 'p5', label: '', type: 'state', fx: 450, fy: 0 },
-      { id: 'p6', label: '', type: 'state', fx: 600, fy: -80 },
-      { id: 'p7', label: '', type: 'state', fx: 600, fy: 80 },
-      { id: 'p8', label: '', type: 'state', fx: 750, fy: 0 },
-      { id: 'p9', label: '+', type: 'accept', fx: 900, fy: 0 }
+      { id: 'p0',  label: '-', type: 'start',  fx: 0,   fy: 0 },
+      { id: 'p1',  label: '',  type: 'state',  fx: 160, fy: -80 },
+      { id: 'p2',  label: '',  type: 'state',  fx: 160, fy: 80 },
+      { id: 'p3',  label: '',  type: 'state',  fx: 320, fy: -80 },
+      { id: 'p4',  label: '',  type: 'state',  fx: 320, fy: 80 },
+      { id: 'p5',  label: '',  type: 'state',  fx: 480, fy: 0 },
+      { id: 'p6',  label: '',  type: 'state',  fx: 640, fy: -80 },
+      { id: 'p7',  label: '',  type: 'state',  fx: 640, fy: 80 },
+      { id: 'p8',  label: '',  type: 'state',  fx: 800, fy: -80 },
+      { id: 'p9',  label: '',  type: 'state',  fx: 830, fy: 130 },
+      { id: 'p10', label: '+', type: 'accept', fx: 970, fy: 0 }
     ],
     links: [
-      { source: 'p0', target: 'p1', label: '0' },
-      { source: 'p0', target: 'p2', label: '1' },
-      { source: 'p1', target: 'p5', label: '0' , curve:2, sweep: 0},
-      { source: 'p1', target: 'p3', label: '1' },
-      { source: 'p2', target: 'p4', label: '0' },
-      { source: 'p2', target: 'p5', label: '1' },
-      { source: 'p3', target: 'p5', label: '0', curve: 1, sweep: 0 },
-      { source: 'p3', target: 'p5', label: '1', curve: 1, sweep: 1},
-      { source: 'p4', target: 'p5', label: '0', curve: 1, sweep: 0 },
-      { source: 'p4', target: 'p5', label: '1', curve: 1, sweep: 1 },
-      { source: 'p5', target: 'p6', label: '0' },
-      { source: 'p5', target: 'p7', label: '1' },
-      { source: 'p6', target: 'p8', label: '0' },
-      { source: 'p6', target: 'p7', label: '1' , curve: 1, sweep: 0},
-      { source: 'p7', target: 'p6', label: '0' },
-      { source: 'p7', target: 'p8', label: '1' },
-      { source: 'p8', target: 'p9', label: '0', curve: 1, sweep: 0 },
-      { source: 'p8', target: 'p9', label: '1', curve: 1, sweep: 1 },
-      { source: 'p9', target: 'p9', label: '0, 1' }
+      { source: 'p0',  target: 'p1',  label: '0' },
+      { source: 'p0',  target: 'p2',  label: '1' },
+      { source: 'p1',  target: 'p4',  label: '0' },
+      { source: 'p1',  target: 'p5',  label: '1', curve: 1.6, sweep: 0 },
+      { source: 'p2',  target: 'p3',  label: '0' },
+      { source: 'p2',  target: 'p2',  label: '1' },
+      { source: 'p3',  target: 'p5',  label: '1', curve: 1.6, sweep: 1 },
+      { source: 'p3',  target: 'p1',  label: '0', curve: 1.4, sweep: 1 },
+      { source: 'p4',  target: 'p5',  label: '0' },
+      { source: 'p4',  target: 'p2',  label: '1', curve: 1.4, sweep: 0 },
+      { source: 'p5',  target: 'p6',  label: '0' },
+      { source: 'p5',  target: 'p7',  label: '1' },
+      { source: 'p6',  target: 'p10', label: '0', curve: 1.6, sweep: 0 },
+      { source: 'p6',  target: 'p7',  label: '1', curve: 10001 },
+      { source: 'p7',  target: 'p8',  label: '0' },
+      { source: 'p7',  target: 'p9',  label: '1' },
+      { source: 'p8',  target: 'p10', label: '1', curve: 1.6, sweep: 1 },
+      { source: 'p8',  target: 'p6',  label: '0', curve: 1.4, sweep: 1 },
+      { source: 'p9',  target: 'p10', label: '1' },
+      { source: 'p9',  target: 'p6',  label: '0', curve: 1.4, sweep: 0 },
+      { source: 'p10', target: 'p10', label: '0, 1' }
     ],
     transitions: {
-      p0: { '0': 'p1', '1': 'p2' },
-      p1: { '0': 'p5', '1': 'p3' },
-      p2: { '0': 'p4', '1': 'p5' },
-      p3: { '0': 'p5', '1': 'p5' },
-      p4: { '0': 'p5', '1': 'p5' },
-      p5: { '0': 'p6', '1': 'p7' },
-      p6: { '0': 'p8', '1': 'p7' },
-      p7: { '0': 'p6', '1': 'p8' },
-      p8: { '0': 'p9', '1': 'p9' },
-      p9: { '0': 'p9', '1': 'p9' }
+      p0:  { '0': 'p1',  '1': 'p2' },
+      p1:  { '0': 'p4',  '1': 'p5' },
+      p2:  { '0': 'p3',  '1': 'p2' },
+      p3:  { '0': 'p1',  '1': 'p5' },
+      p4:  { '0': 'p5',  '1': 'p2' },
+      p5:  { '0': 'p6',  '1': 'p7' },
+      p6:  { '0': 'p10', '1': 'p7' },
+      p7:  { '0': 'p8',  '1': 'p9' },
+      p8:  { '0': 'p6',  '1': 'p10' },
+      p9:  { '0': 'p6',  '1': 'p10' },
+      p10: { '0, 1': 'p10' }
     }
   }
 }
 
 const REGEX_MAP = {
-  1: '(b+aa+ab)(a+b)*(bb+aba+ab)*(aaa+bbb)(a+b)(a+b+ab)*',
-  2: '(1+0)*(11+00+101+010)(1+0+11+00+101)*(11+00)(11+00+101)*(1+0)(1+0+11)*'
+  1: '(bab+bbb)a*b*(a*+b*)(ba)*(aba)(bab+aba)*bb(a+b)*(bab+aba)(a+b)*',
+  2: '(1+0)*1*0*(101+01+000)(1+0)*(101+00)*(111+00+101)(1+0)*'
 }
 
 const dfa = computed(() => DFA_CONFIGS[props.problemId])
@@ -274,12 +291,26 @@ const renderDFA = () => {
 
     const svg = d3.select(svgRef.value).style("overflow", "hidden"); 
 
-    svg.append("defs").selectAll("marker")
-        .data(["end"])
-        .enter().append("marker")
+    const defs = svg.append("defs");
+
+    // Arrow for regular edges (path ends at node center, refX offsets back to circle edge)
+    defs.append("marker")
         .attr("id", "arrow")
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 25)
+        .attr("refX", 22)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#000");
+
+    // Arrow for self-loops (path ends at circle edge, needs small refX)
+    defs.append("marker")
+        .attr("id", "arrow-self")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 9)
         .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
@@ -300,7 +331,11 @@ const renderDFA = () => {
         .attr("fill", "none")
         .attr("stroke", "black")
         .attr("stroke-width", 2)
-        .attr("marker-end", "url(#arrow)");
+        .attr("marker-end", d => {
+            const src = d.source.id ?? d.source;
+            const tgt = d.target.id ?? d.target;
+            return src === tgt ? "url(#arrow-self)" : "url(#arrow)";
+        });
 
     const linkLabel = svg.append("g").selectAll("text")
         .data(data.links).join("text").text(d => d.label)
@@ -322,7 +357,7 @@ const renderDFA = () => {
         .attr("stroke", "#fff")
         .attr("stroke-width", 1.5)
         .attr("r", 20)
-        .attr("fill", d => d.type === 'accept' ? '#4caf50' : (d.type === 'start' ? '#ff9800' : '#2196f3'));
+        .attr("fill", d => d.type === 'accept' ? '#4caf50' : d.type === 'start' ? '#2563eb' : d.type === 'trap' ? '#ef4444' : '#f59e0b');
 
     const label = svg.append("g").selectAll("text")
         .data(data.nodes).join("text").text(d => d.label)
@@ -338,11 +373,14 @@ link.attr("d", d => {
     const dx = d.target.x - d.source.x;
     const dy = d.target.y - d.source.y;
     
-    // 1. Handle Self-Loops (Already working, but kept for context)
+    // 1. Handle Self-Loops
     if (d.source === d.target) {
-        const size = d.curve ? 20 * d.curve : 20;
-        const yOffset = d.curve ? 18 + (d.curve - 1)*20 : 18;
-        return `M${d.source.x - 10},${d.source.y - yOffset} A ${size} ${size} 0 1 1 ${d.source.x + 10},${d.source.y - yOffset}`;
+        const loopR = 16;
+        const edgeDx = 9;
+        const edgeDy = 17;
+        const cx = d.source.x;
+        const cy = d.source.y;
+        return `M${cx - edgeDx},${cy - edgeDy} A ${loopR} ${loopR} 0 1 1 ${cx + edgeDx},${cy - edgeDy}`;
     }
 
     // 2. Calculate Distance
@@ -379,8 +417,7 @@ link.attr("d", d => {
             return link.nodes()[data.links.indexOf(d)].getPointAtLength(0.5 * link.nodes()[data.links.indexOf(d)].getTotalLength()).x;
         })
         .attr("y", d => {
-            if (d.source === d.target) return d.source.y - 45;
-            // Place exactly on the line vertically
+            if (d.source === d.target) return d.source.y - 52;
             return link.nodes()[data.links.indexOf(d)].getPointAtLength(0.5 * link.nodes()[data.links.indexOf(d)].getTotalLength()).y;
         });
 
@@ -397,8 +434,8 @@ link.attr("d", d => {
         const height = maxY - minY + padding * 2;
         svg.attr("viewBox", `${minX - padding} ${minY - padding} ${width} ${height}`)
            .style("width", "100%")
-           .style("max-width", "800px")
-           .style("max-height", "400px"); 
+           .style("max-width", "100%")
+           .style("max-height", "500px");
     }
     simulation.stop();
 };
@@ -444,6 +481,7 @@ onUnmounted(() => {
         <span class="dot start-dot"></span><span class="leg">Start</span>
         <span class="dot state-dot"></span><span class="leg">State</span>
         <span class="dot accept-dot"></span><span class="leg">Accept</span>
+        <span class="dot trap-dot"></span><span class="leg">Trap</span>
       </div>
     </div>
 
@@ -564,9 +602,10 @@ onUnmounted(() => {
     border-radius: 50%;
     display: inline-block;
 }
-.start-dot  { background: #ff9800; }
-.state-dot  { background: #2196f3; margin-left: 0.6rem; }
+.start-dot  { background: #2563eb; }
+.state-dot  { background: #f59e0b; margin-left: 0.6rem; }
 .accept-dot { background: #10b981; margin-left: 0.6rem; }
+.trap-dot   { background: #ef4444; margin-left: 0.6rem; }
 .leg {
     font-size: 12px;
     color: #6b7280;

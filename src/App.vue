@@ -1,135 +1,133 @@
 <script setup>
-import { ref, computed } from 'vue'
-import Problems from './components/Promblems.vue'
-import InputArea from './components/InputArea.vue'
-import NavBar from './components/NavBar.vue'
-import SelectSimulation from './components/SelectSimulation.vue'
-import Diagram from './components/DFAVisualization.vue'
-import PDAVisualization from './components/PDAVisualization.vue'
-import CFGVisualization from './components/CFGVisualization.vue'
-import UserManual from './components/UserManual.vue'
-import Footer from './components/Footer.vue'
+import { ref, computed, nextTick } from 'vue'
+import Problems      from './components/Promblems.vue'
+import InputArea     from './components/InputArea.vue'
+import NavBar        from './components/NavBar.vue'
+import DFAViz        from './components/DFAVisualization.vue'
+import PDAViz        from './components/PDAVisualization.vue'
+import CFGViz        from './components/CFGVisualization.vue'
+import UserManual    from './components/UserManual.vue'
+import Footer        from './components/Footer.vue'
 
-const currentView = ref('regex')
+const currentView    = ref('simulator')
 const activeAutomata = ref('dfa')
-const simulationInputs = ref([])
-
-const automata = ref('automata-theory project')
+const vizRef         = ref(null)
 
 const problems = ref([
   {
     id: 1,
-    label: '(b+aa+ab)(a+b)*(bb+aba+ab)*(aaa+bbb)(a+b)(a+b+ab)*',
-    regexStr: '(b+aa+ab)(a+b)*(bb+aba+ab)*(aaa+bbb)(a+b)(a+b+ab)*'
+    label: 'Problem 1',
+    regexStr: '(bab+bbb)a*b*(a*+b*)(ba)*(aba)(bab+aba)*bb(a+b)*(bab+aba)(a+b)*'
   },
   {
     id: 2,
-    label: '(1+0)*(11+00+101+010)(1+0+11+00+101)*(11+00)(11+00+101)*(1+0)(1+0+11)*',
-    regexStr: '(1+0)*(11+00+101+010)(1+0+11+00+101)*(11+00)(11+00+101)*(1+0)(1+0+11)*'
+    label: 'Problem 2',
+    regexStr: '(1+0)*1*0*(101+01+000)(1+0)*(101+00)*(111+00+101)(1+0)*'
   }
 ])
 
 const selectedProblemIndex = ref(0)
-const currentRegex = computed(() => {
-    return problems.value[selectedProblemIndex.value]?.regexStr || ''
-})
-
-const setView = (view) => {
-  currentView.value = view
-}
-
-const updateSimulationInputs = (newInputs) => {
-  simulationInputs.value = newInputs
-}
+const currentProblem = computed(() => problems.value[selectedProblemIndex.value])
+const currentRegex   = computed(() => currentProblem.value?.regexStr || '')
 
 const currentTestString = ref('')
-const simulationKey = ref(0)
+const simulationKey     = ref(0)
+
+const setView = (v) => { currentView.value = v }
+
 const runSimulation = (str) => {
   currentTestString.value = str
   simulationKey.value++
+  nextTick(() => {
+    vizRef.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  })
 }
+
+const SIM_TABS = [
+  { key: 'dfa', label: 'DFA', full: 'Deterministic Finite Automata' },
+  { key: 'cfg', label: 'CFG', full: 'Context-Free Grammar' },
+  { key: 'pda', label: 'PDA', full: 'Pushdown Automata' },
+]
 </script>
 
 <template>
   <NavBar @change-view="setView" />
-  
-  <div v-if="currentView === 'regex'">
-    <h1 class="main-title">{{ automata }}</h1>
-    <p class="main-title">Interactive Regular Expressions Simulator</p>
 
-    <div class="sections-container">
-      <div class="problem-input-container">
+  <!-- ── Simulator ──────────────────────────────────────────── -->
+  <div v-if="currentView === 'simulator'" class="workspace">
 
-        <div class="section problems-section">
-          <h2>Regular Expressions</h2>
-          <Problems 
-            :problems="problems" 
-            v-model="selectedProblemIndex" 
-          />
-        </div>
+    <!-- Left sidebar -->
+    <aside class="sidebar">
 
-        <div class="section input-section">
-          <h2>Test your Strings</h2>
-          <InputArea 
-            :regexStr="currentRegex" 
-            @inputs-updated="updateSimulationInputs" 
-            @simulate-string="runSimulation" 
-          />
-        </div>
-
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">Automata Simulator</span>
+        <span class="sidebar-brand-sub">Theory of Formal Languages</span>
       </div>
 
-      <!-- Controls -->
-      <div class="visualization-controls">
-        <button 
-          :class="{ active: activeAutomata === 'dfa' }"
-          @click="activeAutomata = 'dfa'"
-        >
-          DFA
-        </button>
+      <!-- Problem selection -->
+      <div class="sidebar-section">
+        <div class="section-label">Problem</div>
+        <Problems :problems="problems" v-model="selectedProblemIndex" />
 
-        <button 
-          :class="{ active: activeAutomata === 'cfg' }"
-          @click="activeAutomata = 'cfg'"
-        >
-          CFG
-        </button>
-
-        <button 
-          :class="{ active: activeAutomata === 'pda' }"
-          @click="activeAutomata = 'pda'"
-        >
-          PDA
-        </button>
-      </div>
-
-      <!-- Visualization -->
-      <div class="section">
-        <div v-if="activeAutomata === 'dfa'">
-          <Diagram 
-            :problemId="problems[selectedProblemIndex].id" 
-            :testString="currentTestString" 
-            :simKey="simulationKey" 
-          />
-        </div>
-
-        <div v-else-if="activeAutomata === 'cfg'">
-          <CFGVisualization 
-            :problemId="problems[selectedProblemIndex].id" 
-            :testString="currentTestString" 
-          />
-        </div>
-
-        <div v-else-if="activeAutomata === 'pda'">
-          <PDAVisualization 
-            :problemId="problems[selectedProblemIndex].id" 
-          />
+        <div class="regex-block">
+          <div class="regex-block-title">Regular Expression</div>
+          <code class="regex-text">{{ currentRegex }}</code>
         </div>
       </div>
 
-    </div>
+      <div class="sidebar-divider"></div>
+
+      <!-- Test inputs -->
+      <div class="sidebar-section">
+        <div class="section-label">Test Strings</div>
+        <InputArea
+          :regexStr="currentRegex"
+          @simulate-string="runSimulation"
+        />
+      </div>
+
+    </aside>
+
+    <!-- Right visualization panel -->
+    <main class="main-panel">
+
+      <div class="viz-header">
+        <div class="viz-tabs">
+          <button
+            v-for="tab in SIM_TABS"
+            :key="tab.key"
+            :class="['viz-tab-btn', activeAutomata === tab.key ? 'is-active' : '']"
+            @click="activeAutomata = tab.key"
+          >
+            <span class="vt-label">{{ tab.label }}</span>
+            <span class="vt-full">{{ tab.full }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div ref="vizRef" class="viz-content">
+        <DFAViz
+          v-if="activeAutomata === 'dfa'"
+          :problemId="currentProblem.id"
+          :testString="currentTestString"
+          :simKey="simulationKey"
+        />
+        <CFGViz
+          v-else-if="activeAutomata === 'cfg'"
+          :problemId="currentProblem.id"
+          :testString="currentTestString"
+        />
+        <PDAViz
+          v-else-if="activeAutomata === 'pda'"
+          :problemId="currentProblem.id"
+        />
+      </div>
+
+    </main>
+
   </div>
 
+  <!-- ── User Manual ────────────────────────────────────────── -->
   <div v-else-if="currentView === 'manual'">
     <UserManual />
   </div>
@@ -138,59 +136,148 @@ const runSimulation = (str) => {
 </template>
 
 <style scoped>
-.single-section {
-  border: 1px solid #000000;
-  padding: 20px;
-  background: #fff;
-}
-
-/* 🔥 Controls container */
-.visualization-controls {
+/* ── Workspace layout ─────────────────────────────────────── */
+.workspace {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin: 30px 0 10px;
-  flex-wrap: wrap;
-  padding: 0 16px;
+  min-height: calc(100vh - 60px);
 }
 
-/* 🔥 Button base */
-.visualization-controls button {
-  padding: 8px 18px;
-  border-radius: 8px;
-  border: 1px solid #d0d7de;
-
+/* ── Left sidebar ─────────────────────────────────────────── */
+.sidebar {
+  width: 340px;
+  flex-shrink: 0;
   background: #ffffff;
-  color: #333;
+  border-right: 1px solid #e1e4e8;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f0f2f4;
+  flex-shrink: 0;
+}
+.sidebar-brand-name {
+  display: block;
   font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+.sidebar-brand-sub {
+  display: block;
+  font-size: 11px;
+  color: #8c959f;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
 
+.sidebar-section {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8c959f;
+}
+
+.regex-block {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.regex-block-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8c959f;
+  margin-bottom: 6px;
+}
+.regex-text {
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 11.5px;
+  color: #0550ae;
+  word-break: break-all;
+  line-height: 1.65;
+  display: block;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: #f0f2f4;
+  flex-shrink: 0;
+}
+
+/* ── Right panel ──────────────────────────────────────────── */
+.main-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f6f8fa;
+}
+
+.viz-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e1e4e8;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.viz-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.viz-tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 14px 20px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
   cursor: pointer;
-  transition: 0.2s ease;
-  min-width: 80px;
+  transition: all 0.15s ease;
+  color: #57606a;
+  gap: 1px;
+  margin-bottom: -1px;
+}
+.viz-tab-btn:hover { color: #0f172a; }
+.viz-tab-btn.is-active {
+  color: #1a7f37;
+  border-bottom-color: #1a7f37;
+}
+.vt-label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.vt-full {
+  font-size: 10px;
+  color: inherit;
+  opacity: 0.7;
 }
 
-/* Hover */
-.visualization-controls button:hover {
-  border-color: #4CAF50;
-  color: #4CAF50;
+.viz-content {
+  flex: 1;
+  overflow-y: auto;
+  scroll-margin-top: 60px;
 }
 
-/* 🔥 Active button */
-.visualization-controls button.active {
-  background: #4CAF50;
-  color: white;
-  border-color: #4CAF50;
-}
-
-@media (max-width: 480px) {
-  .visualization-controls {
-    gap: 8px;
-  }
-  .visualization-controls button {
-    padding: 6px 14px;
-    font-size: 12px;
-    flex: 1;
-  }
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .workspace { flex-direction: column; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e1e4e8; }
+  .main-panel { min-height: 60vh; }
 }
 </style>

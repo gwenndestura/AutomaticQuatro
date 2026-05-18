@@ -13,35 +13,40 @@ const CFG_DATA = {
     1: {
         startSymbol: 'S',
         productions: [
-            { lhs: 'S', alts: ['ABCDEF'] },
-            { lhs: 'A', alts: ['b', 'aa', 'ab'] },
+            { lhs: 'S', alts: ['ABCDEFGH'] },
+            { lhs: 'A', alts: ['bab', 'bbb'] },
             { lhs: 'B', alts: ['λ', 'aB', 'bB'] },
-            { lhs: 'C', alts: ['λ', 'bbC', 'abaC', 'abC'] },
-            { lhs: 'D', alts: ['aaa', 'bbb'] },
-            { lhs: 'E', alts: ['a', 'b'] },
+            { lhs: 'C', alts: ['aba'] },
+            { lhs: 'D', alts: ['λ', 'babD', 'abaD'] },
+            { lhs: 'E', alts: ['bb'] },
             { lhs: 'F', alts: ['λ', 'aF', 'bF'] },
+            { lhs: 'G', alts: ['bab', 'aba'] },
+            { lhs: 'H', alts: ['λ', 'aH', 'bH'] },
         ],
         terminals: ['a', 'b', 'ε'],
-        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E', 'F']
+        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     },
     2: {
         startSymbol: 'S',
         productions: [
-            { lhs: 'S', alts: ['ABACDEA'] },
-            { lhs: 'A', alts: ['0A', '1A', 'λ'] },
-            { lhs: 'B', alts: ['11', '00', '101', '010'] },
-            { lhs: 'C', alts: ['11', '00'] },
-            { lhs: 'D', alts: ['CD', '101D', 'λ'] },
-            { lhs: 'E', alts: ['1', '0'] },
+            { lhs: 'S', alts: ['ABCDEFGH'] },
+            { lhs: 'A', alts: ['λ', '0A', '1A'] },
+            { lhs: 'B', alts: ['λ', '1B'] },
+            { lhs: 'C', alts: ['λ', '0C'] },
+            { lhs: 'D', alts: ['101', '01', '000'] },
+            { lhs: 'E', alts: ['λ', '0E', '1E'] },
+            { lhs: 'F', alts: ['λ', '101F', '00F'] },
+            { lhs: 'G', alts: ['111', '00', '101'] },
+            { lhs: 'H', alts: ['λ', '0H', '1H'] },
         ],
         terminals: ['0', '1'],
-        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E']
+        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     }
 }
 
 const REGEX_MAP = {
-  1: '(b+aa+ab)(a+b)*(bb+aba+ab)*(aaa+bbb)(a+b)(a+b+ab)*',
-  2: '(1+0)*(11+00+101+010)(1+0+11+00+101)*(11+00)(11+00+101)*(1+0)(1+0+11)*'
+  1: '(bab+bbb)a*b*(a*+b*)(ba)*(aba)(bab+aba)*bb(a+b)*(bab+aba)(a+b)*',
+  2: '(1+0)*1*0*(101+01+000)(1+0)*(101+00)*(111+00+101)(1+0)*'
 }
 
 const cfg = computed(() => CFG_DATA[props.problemId] || CFG_DATA[1])
