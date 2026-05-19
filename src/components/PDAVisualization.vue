@@ -267,9 +267,9 @@ const linkData = computed(() => {
 
 const nodeColor = (n) => {
   if (n.type === 'accept') return '#22c55e'
-  if (n.type === 'start')  return '#a78bfa'
-  if (n.type === 'reject') return '#f87171'
-  return '#e879a0'   // decision diamond — pink like the diagram
+  if (n.type === 'start')  return '#3b82f6'
+  if (n.type === 'reject') return '#ef4444'
+  return '#eab308'   // decision diamond — yellow
 }
 
 const viewBox = computed(() => {
@@ -298,15 +298,15 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
       </div>
       <div class="header-right">
         <svg width="28" height="20" style="flex-shrink:0;vertical-align:middle">
-          <polygon points="14,0 28,10 14,20 0,10" fill="#e879a0"/>
+          <polygon points="14,0 28,10 14,20 0,10" fill="#eab308"/>
         </svg>
         <span class="leg">Decision state</span>
         <svg width="36" height="18" style="flex-shrink:0;vertical-align:middle;margin-left:10px">
-          <rect x="1" y="1" width="34" height="16" rx="8" fill="#a78bfa"/>
+          <rect x="1" y="1" width="34" height="16" rx="8" fill="#3b82f6"/>
         </svg>
         <span class="leg">START</span>
         <svg width="36" height="18" style="flex-shrink:0;vertical-align:middle;margin-left:10px">
-          <rect x="1" y="1" width="34" height="16" rx="8" fill="#f87171"/>
+          <rect x="1" y="1" width="34" height="16" rx="8" fill="#ef4444"/>
         </svg>
         <span class="leg">REJECT</span>
         <svg width="36" height="18" style="flex-shrink:0;vertical-align:middle;margin-left:10px">
