@@ -1,47 +1,46 @@
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
-import * as d3 from 'd3'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
-    problemId: { type: Number, required: true },
-    testString: { type: String, default: '' }
+  problemId: { type: Number, required: true },
+  testString: { type: String, default: '' }
 })
 
-const svgRef = ref(null)
-
 const CFG_DATA = {
-    1: {
-        startSymbol: 'S',
-        productions: [
-            { lhs: 'S', alts: ['ABCDEFGH'] },
-            { lhs: 'A', alts: ['bab', 'bbb'] },
-            { lhs: 'B', alts: ['λ', 'aB', 'bB'] },
-            { lhs: 'C', alts: ['aba'] },
-            { lhs: 'D', alts: ['λ', 'babD', 'abaD'] },
-            { lhs: 'E', alts: ['bb'] },
-            { lhs: 'F', alts: ['λ', 'aF', 'bF'] },
-            { lhs: 'G', alts: ['bab', 'aba'] },
-            { lhs: 'H', alts: ['λ', 'aH', 'bH'] },
-        ],
-        terminals: ['a', 'b', 'ε'],
-        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    },
-    2: {
-        startSymbol: 'S',
-        productions: [
-            { lhs: 'S', alts: ['ABCDEFGH'] },
-            { lhs: 'A', alts: ['λ', '0A', '1A'] },
-            { lhs: 'B', alts: ['λ', '1B'] },
-            { lhs: 'C', alts: ['λ', '0C'] },
-            { lhs: 'D', alts: ['101', '01', '000'] },
-            { lhs: 'E', alts: ['λ', '0E', '1E'] },
-            { lhs: 'F', alts: ['λ', '101F', '00F'] },
-            { lhs: 'G', alts: ['111', '00', '101'] },
-            { lhs: 'H', alts: ['λ', '0H', '1H'] },
-        ],
-        terminals: ['0', '1'],
-        nonTerminals: ['S', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    }
+  1: {
+    startSymbol: 'S',
+    productions: [
+      { lhs: 'S', alts: ['ABCDEFGHIJI'], note: '(bab+bbb)·a*·b*·(a*+b*)·(ba)*·aba·(bab+aba)*·bb·(a+b)*·(bab+aba)·(a+b)*' },
+      { lhs: 'A', alts: ['bab', 'bbb'],        note: '(bab + bbb)' },
+      { lhs: 'B', alts: ['λ', 'aB'],           note: 'a*' },
+      { lhs: 'C', alts: ['λ', 'bC'],           note: 'b*' },
+      { lhs: 'D', alts: ['B', 'C'],            note: '(a* + b*)' },
+      { lhs: 'E', alts: ['λ', 'baE'],          note: '(ba)*' },
+      { lhs: 'F', alts: ['aba'],               note: 'aba' },
+      { lhs: 'G', alts: ['λ', 'babG', 'abaG'],note: '(bab + aba)*' },
+      { lhs: 'H', alts: ['bb'],               note: 'bb' },
+      { lhs: 'I', alts: ['λ', 'aI', 'bI'],    note: '(a+b)*' },
+      { lhs: 'J', alts: ['bab', 'aba'],        note: '(bab + aba)' },
+    ],
+    terminals: ['a', 'b'],
+    nonTerminals: ['S','A','B','C','D','E','F','G','H','I','J']
+  },
+  2: {
+    startSymbol: 'S',
+    productions: [
+      { lhs: 'S', alts: ['ABCDEFGH'], note: '(1+0)*·1*·0*·(101+01+000)·(1+0)*·(101+00)*·(111+00+101)·(1+0)*' },
+      { lhs: 'A', alts: ['λ', '0A', '1A'],      note: '(1+0)*' },
+      { lhs: 'B', alts: ['λ', '1B'],            note: '1*' },
+      { lhs: 'C', alts: ['λ', '0C'],            note: '0*' },
+      { lhs: 'D', alts: ['101', '01', '000'],   note: '(101 + 01 + 000)' },
+      { lhs: 'E', alts: ['λ', '0E', '1E'],      note: '(1+0)*' },
+      { lhs: 'F', alts: ['λ', '101F', '00F'],   note: '(101 + 00)*' },
+      { lhs: 'G', alts: ['111', '00', '101'],   note: '(111 + 00 + 101)' },
+      { lhs: 'H', alts: ['λ', '0H', '1H'],      note: '(1+0)*' },
+    ],
+    terminals: ['0', '1'],
+    nonTerminals: ['S','A','B','C','D','E','F','G','H']
+  }
 }
 
 const REGEX_MAP = {
@@ -49,123 +48,101 @@ const REGEX_MAP = {
   2: '(1+0)*1*0*(101+01+000)(1+0)*(101+00)*(111+00+101)(1+0)*'
 }
 
-const cfg = computed(() => CFG_DATA[props.problemId] || CFG_DATA[1])
+const cfg         = computed(() => CFG_DATA[props.problemId] || CFG_DATA[1])
 const problemRegex = computed(() => REGEX_MAP[props.problemId])
-const hoveredRow = ref(null)
+const hoveredRow  = ref(null)
+const simInput    = ref('')
+const derivation  = ref(null)
+const simError    = ref('')
+const simStatus   = ref('')   // 'ok' | 'fail' | ''
 
+// Tokenise an alt string character-by-character
 const tokenizeAlt = (alt) => {
-    return [...alt].map(ch => ({
-        ch,
-        isNT: cfg.value.nonTerminals.includes(ch)
-    }))
+  if (alt === 'λ') return [{ ch: 'λ', isNT: false }]
+  return [...alt].map(ch => ({ ch, isNT: cfg.value.nonTerminals.includes(ch) }))
 }
 
-const generateDerivationTree = (inputStr, cfgData) => {
-    if (!inputStr) return null
-    const symbols = inputStr.split('')
-    const root = { id: 'root', name: cfgData.startSymbol, children: [] }
-    let currentLevel = [root]
-    let symbolIndex = 0
-    let depth = 0
-    const maxDepth = 20
-    while (symbolIndex < symbols.length && depth < maxDepth) {
-        const nextLevel = []
-        for (const node of currentLevel) {
-            if (cfgData.nonTerminals.includes(node.name)) {
-                const matchingProd = cfgData.productions.find(p => {
-                    if (p.lhs !== node.name) return false
-                    const rhsStr = p.rhs.join('')
-                    return rhsStr.includes(symbols[symbolIndex]) ||
-                           (cfgData.nonTerminals.some(nt => rhsStr.includes(nt)))
-                })
-                if (matchingProd) {
-                    const children = matchingProd.rhs.map((sym, i) => ({
-                        id: `${node.id}-${i}`,
-                        name: sym,
-                        children: cfgData.nonTerminals.includes(sym) ? [] : undefined
-                    }))
-                    node.children = children
-                    nextLevel.push(...children.filter(c => cfgData.nonTerminals.includes(c.name)))
-                } else {
-                    node.children = [{ id: `${node.id}-t`, name: symbols[symbolIndex], children: undefined }]
-                    symbolIndex++
-                }
-            }
-        }
-        currentLevel = nextLevel
-        depth++
+// Tokenise a sentential-form step string for the simulation display
+const tokenizeStep = (step) => {
+  if (!step || step === 'λ') return [{ ch: 'λ', isNT: false }]
+  return [...step].map(ch => ({ ch, isNT: cfg.value.nonTerminals.includes(ch) }))
+}
+
+// ── Leftmost derivation (backtracking) ──────────────────────────────────────
+function getDerivation(cfgData, input) {
+  const ntSet = new Set(cfgData.nonTerminals)
+  const MAX   = 300
+  const steps = []
+
+  const sentStr = (syms) => {
+    const s = syms.filter(x => x !== 'λ').join('')
+    return s || 'λ'
+  }
+
+  function tryDerive(syms) {
+    if (steps.length >= MAX) return false
+
+    const ntIdx = syms.findIndex(s => ntSet.has(s))
+
+    // No non-terminals left — check if string matches
+    if (ntIdx === -1) {
+      return syms.filter(x => x !== 'λ').join('') === input
     }
-    while (symbolIndex < symbols.length) {
-        const lastNonTerminal = findLastNonTerminal(root)
-        if (lastNonTerminal) {
-            lastNonTerminal.children = lastNonTerminal.children || []
-            lastNonTerminal.children.push({
-                id: `${lastNonTerminal.id}-${symbolIndex}`,
-                name: symbols[symbolIndex],
-                children: undefined
-            })
-        }
-        symbolIndex++
+
+    // Prune: terminal prefix must be a prefix of input
+    const prefix = syms.slice(0, ntIdx).filter(x => x !== 'λ').join('')
+    if (!input.startsWith(prefix)) return false
+
+    // Prune: total terminals already derived can't exceed input length
+    const termCount = syms.filter(x => !ntSet.has(x) && x !== 'λ').length
+    if (termCount > input.length) return false
+
+    const nt   = syms[ntIdx]
+    const prod = cfgData.productions.find(p => p.lhs === nt)
+    if (!prod) return false
+
+    for (const alt of prod.alts) {
+      const altSyms  = alt === 'λ' ? ['λ'] : [...alt]
+      const newSyms  = [
+        ...syms.slice(0, ntIdx),
+        ...altSyms,
+        ...syms.slice(ntIdx + 1)
+      ]
+      steps.push(sentStr(newSyms))
+      if (tryDerive(newSyms)) return true
+      steps.pop()
     }
-    return root
+    return false
+  }
+
+  steps.push(cfgData.startSymbol)
+  const ok = tryDerive([cfgData.startSymbol])
+  return ok ? steps : null
 }
 
-const findLastNonTerminal = (node) => {
-    if (!node.children || node.children.length === 0) {
-        return cfg.value.nonTerminals.includes(node.name) ? node : null
-    }
-    for (let i = node.children.length - 1; i >= 0; i--) {
-        const result = findLastNonTerminal(node.children[i])
-        if (result) return result
-    }
-    return null
+function runSimulation() {
+  simError.value  = ''
+  derivation.value = null
+  simStatus.value  = ''
+  const input = simInput.value.trim()
+  if (!input) { simError.value = 'Enter a string to simulate.'; return }
+
+  const steps = getDerivation(cfg.value, input)
+  if (steps) {
+    derivation.value = steps
+    simStatus.value  = 'ok'
+  } else {
+    simStatus.value = 'fail'
+    simError.value  = `"${input}" is not accepted by this grammar.`
+  }
 }
 
-const treeData = computed(() => generateDerivationTree(props.testString, cfg.value))
-
-const renderTree = () => {
-    if (!svgRef.value) return
-    const data = treeData.value
-    if (!data) { renderGrammar(); return }
-    d3.select(svgRef.value).selectAll("*").remove()
-    const svg = d3.select(svgRef.value).attr("width", "100%").style("overflow", "visible")
-    svg.append("defs").selectAll("marker").data(["end"]).enter().append("marker")
-        .attr("id", "arrow-cfg").attr("viewBox", "0 -5 10 10")
-        .attr("refX", 0).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-        .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#666")
-    const margin = { top: 40, right: 90, bottom: 30, left: 90 }
-    const width = 800 - margin.left - margin.right
-    const height = 400 - margin.top - margin.bottom
-    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`)
-    const tree = d3.tree().size([width, height])
-    const root = d3.hierarchy(data)
-    tree(root)
-    g.selectAll(".link").data(root.links()).enter().append("path")
-        .attr("class", "link").attr("fill", "none").attr("stroke", "#666").attr("stroke-width", 2)
-        .attr("marker-end", "url(#arrow-cfg)").attr("d", d3.linkVertical().x(d => d.x).y(d => d.y))
-    const nodes = g.selectAll(".node").data(root.descendants()).enter().append("g")
-        .attr("class", "node").attr("transform", d => `translate(${d.x},${d.y})`)
-    nodes.append("circle").attr("r", 18)
-        .attr("fill", d => !cfg.value.nonTerminals.includes(d.data.name) ? '#4caf50' : '#ff9800')
-        .attr("stroke", "#fff").attr("stroke-width", 2)
-    nodes.append("text").attr("dy", 4).attr("text-anchor", "middle")
-        .attr("font-size", "14px").attr("font-weight", "bold").attr("fill", "white")
-        .text(d => d.data.name)
-    svg.attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-        .style("max-width", "100%").style("height", "auto")
-}
-
-const renderGrammar = () => {
-    if (!svgRef.value) return
-    d3.select(svgRef.value).selectAll("*").remove()
-    const svg = d3.select(svgRef.value).attr("width", "100%").attr("height", "200")
-    svg.append("text").attr("x", 50).attr("y", 100).attr("font-size", "16px").attr("fill", "#666")
-        .text("Derivation tree will appear when you test a string")
-}
-
-watch(() => props.problemId, () => renderTree())
-watch(() => props.testString, () => renderTree())
-onMounted(() => renderTree())
+watch(() => props.testString, (val) => {
+  if (val) { simInput.value = val; runSimulation() }
+})
+watch(() => props.problemId, () => {
+  simInput.value = ''; derivation.value = null; simError.value = ''; simStatus.value = ''
+})
 </script>
 
 <template>
@@ -184,7 +161,7 @@ onMounted(() => renderTree())
     </div>
 
     <!-- Regex -->
-    <div class="regex-wrap" v-if="problemRegex">
+    <div class="regex-wrap">
       <span class="regex-label">Regex</span>
       <code class="regex-code">{{ problemRegex }}</code>
     </div>
@@ -192,7 +169,7 @@ onMounted(() => renderTree())
     <!-- Productions -->
     <div class="rule-card">
       <div class="rule-card-head">
-        <span>Productions</span>
+        <span>Production Rules</span>
         <span class="rule-count">{{ cfg.productions.length }} rules</span>
       </div>
       <div class="rule-list">
@@ -216,7 +193,54 @@ onMounted(() => renderTree())
               >{{ tok.ch }}</span>
             </template>
           </span>
-          <span class="row-num">{{ idx + 1 }}</span>
+          <span class="rule-note">{{ prod.note }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulation -->
+    <div class="sim-card">
+      <div class="sim-head">String Simulation</div>
+      <div class="sim-body">
+        <div class="sim-input-row">
+          <input
+            v-model="simInput"
+            class="sim-input"
+            :placeholder="problemId === 1 ? 'e.g. babababbbab' : 'e.g. 101000101'"
+            spellcheck="false"
+            autocomplete="off"
+            @keydown.enter="runSimulation"
+          />
+          <button class="sim-btn" @click="runSimulation">Simulate</button>
+        </div>
+
+        <!-- Error -->
+        <div v-if="simError" class="sim-error">{{ simError }}</div>
+
+        <!-- Derivation steps -->
+        <div v-if="derivation" class="deriv-box">
+          <div class="deriv-title">
+            Leftmost Derivation of
+            <code class="deriv-input-label">{{ simInput.trim() }}</code>
+            <span class="deriv-steps-count">{{ derivation.length - 1 }} step{{ derivation.length !== 2 ? 's' : '' }}</span>
+          </div>
+
+          <div class="deriv-lines">
+            <div
+              v-for="(step, si) in derivation"
+              :key="si"
+              class="deriv-line"
+            >
+              <span class="deriv-arrow">{{ si === 0 ? ' ' : '→' }}</span>
+              <span class="deriv-form">
+                <span
+                  v-for="(tok, ti) in tokenizeStep(step)"
+                  :key="ti"
+                  :class="['dtok', tok.isNT ? 'dnt' : 'dt']"
+                >{{ tok.ch }}</span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -226,188 +250,90 @@ onMounted(() => renderTree())
 
 <style scoped>
 .cfg-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    max-width: 900px;        /* 🔥 LIMIT WIDTH */
-    margin: 20px auto;       /* 🔥 CENTER IT */
-    padding: 1.2rem;
-
-    background: #ffffff;     /* 🔥 make it a card */
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 1.2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* Header */
-.cfg-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-.badge {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 5px;
-}
-.title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e1e2e;
-}
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    display: inline-block;
-}
-.nt-dot { background: #f59e0b; }
-.t-dot  { background: #10b981; margin-left: 0.6rem; }
-.leg {
-    font-size: 12px;
-    color: #6b7280;
-}
+.cfg-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+.header-left { display:flex; align-items:center; gap:0.6rem; }
+.badge { background:#1e1e2e; color:#cdd6f4; font-size:11px; font-weight:600; letter-spacing:0.08em; padding:3px 8px; border-radius:5px; }
+.title { font-size:18px; font-weight:600; color:#1e1e2e; }
+.header-right { display:flex; align-items:center; gap:0.4rem; }
+.dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.nt-dot { background:#f59e0b; }
+.t-dot  { background:#10b981; margin-left:0.6rem; }
+.leg { font-size:12px; color:#6b7280; }
 
 /* Regex */
-.regex-wrap {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.6rem 0.9rem;
-}
-.regex-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding-top: 2px;
-    white-space: nowrap;
-}
-.regex-code {
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    color: #334155;
-    word-break: break-all;
-    line-height: 1.6;
-}
+.regex-wrap { display:flex; align-items:flex-start; gap:0.6rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.9rem; }
+.regex-label { font-size:11px; font-weight:600; color:#94a3b8; letter-spacing:0.06em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
+.regex-code { font-family:'Courier New',monospace; font-size:13px; color:#334155; word-break:break-all; line-height:1.6; }
 
 /* Rule card */
-.rule-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fff;
-}
-.rule-card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.55rem 1rem;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    font-size: 12px;
-    font-weight: 600;
-    color: #64748b;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-.rule-count {
-    font-size: 11px;
-    font-weight: 500;
-    color: #94a3b8;
-    background: #f1f5f9;
-    padding: 2px 8px;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-}
+.rule-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
+.rule-card-head { display:flex; align-items:center; justify-content:space-between; padding:0.55rem 1rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; letter-spacing:0.04em; text-transform:uppercase; }
+.rule-count { font-size:11px; font-weight:500; color:#94a3b8; background:#f1f5f9; padding:2px 8px; border-radius:20px; border:1px solid #e2e8f0; }
+.rule-list { display:flex; flex-direction:column; }
+.rule-row { display:flex; align-items:center; gap:0; padding:0.45rem 1rem; border-bottom:1px solid #f1f5f9; font-family:'Courier New',monospace; font-size:13.5px; transition:background 0.15s; cursor:default; }
+.rule-row:last-child { border-bottom:none; }
+.rule-row.hovered { background:#fafafa; }
+.lhs { font-weight:700; color:#f59e0b; min-width:18px; }
+.rule-row.hovered .lhs { color:#d97706; }
+.arrow { color:#cbd5e1; margin:0 0.65rem; font-size:15px; }
+.rhs-group { display:flex; flex-wrap:wrap; align-items:center; gap:1px; flex:1; }
+.pipe { color:#cbd5e1; margin:0 0.35rem; }
+.tok { font-family:'Courier New',monospace; font-size:13.5px; }
+.tok.nt { color:#f59e0b; }
+.tok.t  { color:#10b981; }
+.rule-note { font-size:10.5px; color:#94a3b8; margin-left:auto; padding-left:12px; font-family:'Inter',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+.rule-row.hovered .rule-note { color:#64748b; }
 
-/* Rule rows */
-.rule-list {
-    display: flex;
-    flex-direction: column;
-}
-.rule-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid #f1f5f9;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    transition: background 0.15s;
-    cursor: default;
-    position: relative;
-}
-.rule-row:last-child {
-    border-bottom: none;
-}
-.rule-row.hovered {
-    background: #fafafa;
-}
-.rule-row.hovered .lhs {
-    color: #d97706;
-}
+/* Simulation card */
+.sim-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
+.sim-head { padding:0.55rem 1rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; letter-spacing:0.04em; text-transform:uppercase; }
+.sim-body { padding:1rem; display:flex; flex-direction:column; gap:0.75rem; }
 
-.lhs {
-    font-weight: 700;
-    color: #f59e0b;
-    min-width: 18px;
-    transition: color 0.15s;
+.sim-input-row { display:flex; gap:8px; }
+.sim-input {
+  flex:1; padding:7px 10px; border:1px solid #e2e8f0; border-radius:6px;
+  font-family:'Courier New',monospace; font-size:13px; color:#0f172a;
+  outline:none; transition:border-color 0.15s;
 }
-.arrow {
-    color: #cbd5e1;
-    margin: 0 0.65rem;
-    font-size: 15px;
+.sim-input:focus { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,0.1); }
+.sim-btn {
+  padding:7px 16px; font-size:12px; font-weight:600; color:#fff;
+  background:#f59e0b; border:none; border-radius:6px; cursor:pointer;
+  transition:background 0.15s;
+  white-space:nowrap;
 }
-.rhs-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1px;
-    flex: 1;
-}
-.pipe {
-    color: #cbd5e1;
-    margin: 0 0.35rem;
-    font-size: 13px;
-}
-.tok {
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-}
-.tok.nt { color: #f59e0b; }
-.tok.t  { color: #10b981; }
+.sim-btn:hover { background:#d97706; }
 
-.row-num {
-    font-size: 11px;
-    color: #e2e8f0;
-    font-family: 'Inter', sans-serif;
-    min-width: 16px;
-    text-align: right;
+.sim-error { font-size:12.5px; color:#ef4444; padding:6px 10px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; }
+
+/* Derivation display */
+.deriv-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; }
+.deriv-title {
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:8px 14px; border-bottom:1px solid #e2e8f0;
+  font-size:11.5px; font-weight:600; color:#64748b;
 }
-.rule-row.hovered .row-num {
-    color: #94a3b8;
-}
+.deriv-input-label { font-family:'Courier New',monospace; color:#0f172a; background:#e2e8f0; padding:1px 6px; border-radius:4px; }
+.deriv-steps-count { margin-left:auto; font-size:10.5px; color:#94a3b8; font-weight:500; }
+
+.deriv-lines { padding:12px 14px; display:flex; flex-direction:column; gap:3px; max-height:440px; overflow-y:auto; }
+
+.deriv-line { display:flex; align-items:baseline; gap:10px; font-family:'Courier New',monospace; font-size:13px; }
+.deriv-arrow { color:#cbd5e1; font-size:15px; min-width:14px; text-align:center; flex-shrink:0; }
+.deriv-form  { display:flex; flex-wrap:wrap; gap:0; }
+.dtok.dnt { color:#f59e0b; font-weight:700; }
+.dtok.dt  { color:#10b981; }
 </style>
