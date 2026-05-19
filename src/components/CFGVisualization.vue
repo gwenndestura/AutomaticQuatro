@@ -160,8 +160,8 @@ watch(() => props.testString, (val) => { if (val) runSimulation(true) })
 watch(() => props.problemId, () => {
   derivation.value = null; simError.value = ''; simStatus.value = ''
 })
-// on tab switch, just re-derive without scrolling
-onMounted(() => { if (props.testString) runSimulation(false) })
+// on tab switch, only re-derive if testString is already set (same problem)
+onMounted(() => { if (props.testString.trim()) runSimulation(false) })
 </script>
 
 <template>

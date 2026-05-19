@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import Problems      from './components/Promblems.vue'
 import InputArea     from './components/InputArea.vue'
 import NavBar        from './components/NavBar.vue'
@@ -32,6 +32,10 @@ const currentRegex   = computed(() => currentProblem.value?.regexStr || '')
 
 const currentTestString = ref('')
 const simulationKey     = ref(0)
+
+watch(selectedProblemIndex, () => {
+  currentTestString.value = ''
+})
 
 const setView = (v) => { currentView.value = v }
 
