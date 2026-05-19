@@ -146,7 +146,7 @@ function runSimulation() {
   if (steps) {
     derivation.value = steps
     simStatus.value  = 'ok'
-    nextTick(() => simCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    nextTick(() => setTimeout(() => simCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120))
   } else {
     simStatus.value = 'fail'
     simError.value  = `"${input}" is not accepted by this grammar.`
