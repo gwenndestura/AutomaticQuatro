@@ -135,7 +135,7 @@ function getDerivation(cfgData, input) {
   return ok ? steps : null
 }
 
-function runSimulation() {
+function runSimulation(scroll = false) {
   simError.value   = ''
   derivation.value = null
   simStatus.value  = ''
@@ -146,18 +146,22 @@ function runSimulation() {
   if (steps) {
     derivation.value = steps
     simStatus.value  = 'ok'
-    nextTick(() => setTimeout(() => simCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120))
+    if (scroll) {
+      nextTick(() => setTimeout(() => simCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120))
+    }
   } else {
     simStatus.value = 'fail'
     simError.value  = `"${input}" is not accepted by this grammar.`
   }
 }
 
-watch(() => props.testString, (val) => { if (val) runSimulation() })
+// scroll=true only when Run is clicked (testString prop changes)
+watch(() => props.testString, (val) => { if (val) runSimulation(true) })
 watch(() => props.problemId, () => {
   derivation.value = null; simError.value = ''; simStatus.value = ''
 })
-onMounted(() => { if (props.testString) runSimulation() })
+// on tab switch, just re-derive without scrolling
+onMounted(() => { if (props.testString) runSimulation(false) })
 </script>
 
 <template>
