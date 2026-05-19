@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   problemId: { type: Number, required: true },
@@ -54,6 +54,7 @@ const hoveredRow  = ref(null)
 const derivation  = ref(null)
 const simError    = ref('')
 const simStatus   = ref('')   // 'ok' | 'fail' | ''
+const simCardRef  = ref(null)
 
 // Tokenise an alt string character-by-character
 const tokenizeAlt = (alt) => {
@@ -145,6 +146,7 @@ function runSimulation() {
   if (steps) {
     derivation.value = steps
     simStatus.value  = 'ok'
+    nextTick(() => simCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
   } else {
     simStatus.value = 'fail'
     simError.value  = `"${input}" is not accepted by this grammar.`
@@ -212,7 +214,7 @@ onMounted(() => { if (props.testString) runSimulation() })
     </div>
 
     <!-- Simulation -->
-    <div class="sim-card">
+    <div class="sim-card" ref="simCardRef">
       <div class="sim-head">String Simulation</div>
       <div class="sim-body">
         <!-- No result yet -->
@@ -233,11 +235,19 @@ onMounted(() => { if (props.testString) runSimulation() })
 
           <div class="deriv-lines">
             <div
-              v-for="(step, si) in derivation"
+              v-for="(step, si) in derivation.slice(1)"
               :key="si"
               class="deriv-line"
             >
-              <span class="deriv-arrow">{{ si === 0 ? ' ' : '→' }}</span>
+              <span class="deriv-lhs">
+                <span
+                  v-if="si === 0"
+                  v-for="(tok, ti) in tokenizeStep(derivation[0])"
+                  :key="ti"
+                  :class="['dtok', tok.isNT ? 'dnt' : 'dt']"
+                >{{ tok.ch }}</span>
+              </span>
+              <span class="deriv-sep">→</span>
               <span class="deriv-form">
                 <span
                   v-for="(tok, ti) in tokenizeStep(step)"
@@ -324,8 +334,9 @@ onMounted(() => { if (props.testString) runSimulation() })
 
 .deriv-lines { padding:12px 14px; display:flex; flex-direction:column; gap:3px; max-height:440px; overflow-y:auto; }
 
-.deriv-line { display:flex; align-items:baseline; gap:10px; font-family:'Courier New',monospace; font-size:13px; }
-.deriv-arrow { color:#cbd5e1; font-size:15px; min-width:14px; text-align:center; flex-shrink:0; }
+.deriv-line  { display:flex; align-items:baseline; gap:6px; font-family:'Courier New',monospace; font-size:13px; }
+.deriv-lhs   { min-width:1ch; flex-shrink:0; display:flex; }
+.deriv-sep   { color:#94a3b8; font-size:14px; flex-shrink:0; }
 .deriv-form  { display:flex; flex-wrap:wrap; gap:0; }
 .dtok.dnt    { color:#f59e0b; font-weight:700; }
 .dtok.dt     { color:#10b981; }
