@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 const props = defineProps({
   problemId: { type: Number, required: true },
@@ -51,7 +51,6 @@ const REGEX_MAP = {
 const cfg         = computed(() => CFG_DATA[props.problemId] || CFG_DATA[1])
 const problemRegex = computed(() => REGEX_MAP[props.problemId])
 const hoveredRow  = ref(null)
-const simInput    = ref('')
 const derivation  = ref(null)
 const simError    = ref('')
 const simStatus   = ref('')   // 'ok' | 'fail' | ''
@@ -64,8 +63,12 @@ const tokenizeAlt = (alt) => {
 
 // Tokenise a sentential-form step string for the simulation display
 const tokenizeStep = (step) => {
-  if (!step || step === 'λ') return [{ ch: 'λ', isNT: false }]
-  return [...step].map(ch => ({ ch, isNT: cfg.value.nonTerminals.includes(ch) }))
+  if (!step || step === 'λ') return [{ ch: 'λ', isNT: false, isLambda: true }]
+  return [...step].map(ch => ({
+    ch,
+    isNT: cfg.value.nonTerminals.includes(ch),
+    isLambda: ch === 'λ'
+  }))
 }
 
 // ── Leftmost derivation (backtracking) ──────────────────────────────────────
@@ -102,15 +105,26 @@ function getDerivation(cfgData, input) {
     if (!prod) return false
 
     for (const alt of prod.alts) {
-      const altSyms  = alt === 'λ' ? ['λ'] : [...alt]
-      const newSyms  = [
-        ...syms.slice(0, ntIdx),
-        ...altSyms,
-        ...syms.slice(ntIdx + 1)
-      ]
-      steps.push(sentStr(newSyms))
-      if (tryDerive(newSyms)) return true
-      steps.pop()
+      const altSyms = alt === 'λ' ? ['λ'] : [...alt]
+      const newSyms = [...syms.slice(0, ntIdx), ...altSyms, ...syms.slice(ntIdx + 1)]
+
+      if (alt === 'λ') {
+        // Show the λ explicitly before collapsing it away
+        const prefix     = syms.slice(0, ntIdx).filter(x => x !== 'λ').join('')
+        const suffix     = syms.slice(ntIdx + 1).filter(x => x !== 'λ').join('')
+        const lambdaStep = prefix + 'λ' + suffix
+        const finalStep  = sentStr(newSyms)
+        const twoSteps   = lambdaStep !== finalStep
+        steps.push(lambdaStep)
+        if (twoSteps) steps.push(finalStep)
+        if (tryDerive(newSyms)) return true
+        if (twoSteps) steps.pop()
+        steps.pop()
+      } else {
+        steps.push(sentStr(newSyms))
+        if (tryDerive(newSyms)) return true
+        steps.pop()
+      }
     }
     return false
   }
@@ -121,11 +135,11 @@ function getDerivation(cfgData, input) {
 }
 
 function runSimulation() {
-  simError.value  = ''
+  simError.value   = ''
   derivation.value = null
   simStatus.value  = ''
-  const input = simInput.value.trim()
-  if (!input) { simError.value = 'Enter a string to simulate.'; return }
+  const input = props.testString.trim()
+  if (!input) return
 
   const steps = getDerivation(cfg.value, input)
   if (steps) {
@@ -137,12 +151,11 @@ function runSimulation() {
   }
 }
 
-watch(() => props.testString, (val) => {
-  if (val) { simInput.value = val; runSimulation() }
-})
+watch(() => props.testString, (val) => { if (val) runSimulation() })
 watch(() => props.problemId, () => {
-  simInput.value = ''; derivation.value = null; simError.value = ''; simStatus.value = ''
+  derivation.value = null; simError.value = ''; simStatus.value = ''
 })
+onMounted(() => { if (props.testString) runSimulation() })
 </script>
 
 <template>
@@ -202,16 +215,9 @@ watch(() => props.problemId, () => {
     <div class="sim-card">
       <div class="sim-head">String Simulation</div>
       <div class="sim-body">
-        <div class="sim-input-row">
-          <input
-            v-model="simInput"
-            class="sim-input"
-            :placeholder="problemId === 1 ? 'e.g. babababbbab' : 'e.g. 101000101'"
-            spellcheck="false"
-            autocomplete="off"
-            @keydown.enter="runSimulation"
-          />
-          <button class="sim-btn" @click="runSimulation">Simulate</button>
+        <!-- No result yet -->
+        <div v-if="!derivation && !simError" class="sim-hint">
+          Run a test string from the left panel to see the leftmost derivation here.
         </div>
 
         <!-- Error -->
@@ -221,7 +227,7 @@ watch(() => props.problemId, () => {
         <div v-if="derivation" class="deriv-box">
           <div class="deriv-title">
             Leftmost Derivation of
-            <code class="deriv-input-label">{{ simInput.trim() }}</code>
+            <code class="deriv-input-label">{{ testString.trim() }}</code>
             <span class="deriv-steps-count">{{ derivation.length - 1 }} step{{ derivation.length !== 2 ? 's' : '' }}</span>
           </div>
 
@@ -236,7 +242,7 @@ watch(() => props.problemId, () => {
                 <span
                   v-for="(tok, ti) in tokenizeStep(step)"
                   :key="ti"
-                  :class="['dtok', tok.isNT ? 'dnt' : 'dt']"
+                  :class="['dtok', tok.isLambda ? 'dlambda' : tok.isNT ? 'dnt' : 'dt']"
                 >{{ tok.ch }}</span>
               </span>
             </div>
@@ -302,20 +308,7 @@ watch(() => props.problemId, () => {
 .sim-head { padding:0.55rem 1rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; letter-spacing:0.04em; text-transform:uppercase; }
 .sim-body { padding:1rem; display:flex; flex-direction:column; gap:0.75rem; }
 
-.sim-input-row { display:flex; gap:8px; }
-.sim-input {
-  flex:1; padding:7px 10px; border:1px solid #e2e8f0; border-radius:6px;
-  font-family:'Courier New',monospace; font-size:13px; color:#0f172a;
-  outline:none; transition:border-color 0.15s;
-}
-.sim-input:focus { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,0.1); }
-.sim-btn {
-  padding:7px 16px; font-size:12px; font-weight:600; color:#fff;
-  background:#f59e0b; border:none; border-radius:6px; cursor:pointer;
-  transition:background 0.15s;
-  white-space:nowrap;
-}
-.sim-btn:hover { background:#d97706; }
+.sim-hint { font-size:12.5px; color:#94a3b8; font-style:italic; padding:4px 0; }
 
 .sim-error { font-size:12.5px; color:#ef4444; padding:6px 10px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; }
 
@@ -334,6 +327,7 @@ watch(() => props.problemId, () => {
 .deriv-line { display:flex; align-items:baseline; gap:10px; font-family:'Courier New',monospace; font-size:13px; }
 .deriv-arrow { color:#cbd5e1; font-size:15px; min-width:14px; text-align:center; flex-shrink:0; }
 .deriv-form  { display:flex; flex-wrap:wrap; gap:0; }
-.dtok.dnt { color:#f59e0b; font-weight:700; }
-.dtok.dt  { color:#10b981; }
+.dtok.dnt    { color:#f59e0b; font-weight:700; }
+.dtok.dt     { color:#10b981; }
+.dtok.dlambda{ color:#94a3b8; font-style:italic; }
 </style>
