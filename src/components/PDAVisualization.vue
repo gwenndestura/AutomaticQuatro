@@ -25,7 +25,7 @@ const PDA_CONFIGS = {
     nodes: [
       // oblongs
       { id: 'START', label: 'START',  type: 'start',  x: 200,  y:  60 },
-      { id: 'ACCEPT',label: 'ACCEPT', type: 'accept', x:1100,  y: 720 },
+      { id: 'ACCEPT',label: 'ACCEPT', type: 'accept', x:1100,  y: 860 },
       // reject terminals
       { id: 'rj1',  label: 'REJECT', type: 'reject', x:  50,  y: 160 },
       { id: 'rj2',  label: 'REJECT', type: 'reject', x: 380,  y:  60 },
@@ -36,7 +36,7 @@ const PDA_CONFIGS = {
       { id: 'rj7',  label: 'REJECT', type: 'reject', x: 620,  y: 360 },
       { id: 'rj8',  label: 'REJECT', type: 'reject', x: 280,  y: 580 },
       { id: 'rj9',  label: 'REJECT', type: 'reject', x: 780,  y: 360 },
-      { id: 'rj10', label: 'REJECT', type: 'reject', x: 900,  y: 630 },
+      { id: 'rj10', label: 'REJECT', type: 'reject', x: 660,  y: 640 },
       // decision diamonds
       { id: 'R1',  label: 'R1',  type: 'state', x: 200,  y: 160 },
       { id: 'R2',  label: 'R2',  type: 'state', x: 380,  y: 160 },
@@ -83,11 +83,11 @@ const PDA_CONFIGS = {
       { src: 'R10', tgt: 'R13',  label: '1' },
       { src: 'R10', tgt: 'R11',  label: '0', curve: 10001 },
       { src: 'R11', tgt: 'R13',  label: '0,1', curve: 1.4, sweep: 1 },
-      { src: 'R11', tgt: 'ACCEPT',label: 'Δ',  curve: 0.65, sweep: 1 },
+      { src: 'R11', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
       { src: 'R12', tgt: 'R13',  label: '0,1', curve: 10001 },
-      { src: 'R12', tgt: 'ACCEPT',label: 'Δ' },
+      { src: 'R12', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
       { src: 'R13', tgt: 'R13',  label: '0,1' },
-      { src: 'R13', tgt: 'ACCEPT',label: 'Δ' },
+      { src: 'R13', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
     ]
   },
 
