@@ -1,8 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 
 const props = defineProps({
-  problemId: { type: Number, required: true }
+  problemId: { type: Number, required: true },
+  testString: { type: String, default: '' },
+  simKey:     { type: Number, default: 0 }
 })
 
 const REGEX_MAP = {
@@ -10,23 +12,17 @@ const REGEX_MAP = {
   2: '(1+0)*1*0*(101+01+000)(1+0)*(101+00)*(111+00+101)(1+0)*'
 }
 
-// Oblong (START / REJECT / ACCEPT) dimensions
-const OW = 36, OH = 14
-// Diamond (read/decision state) half-width / half-height
-const DW = 28, DH = 20
+const OW = 36, OH = 14   // oblong half-dims
+const DW = 28, DH = 20   // diamond half-dims
 
 // ── PDA graph data ──────────────────────────────────────────────────────────
-// type: 'start' | 'state' | 'reject' | 'accept'
-// 'state' nodes render as diamonds; others as oblongs
 
 const PDA_CONFIGS = {
   // ── Problem 2  (R states, binary alphabet) ──────────────────────────────
   2: {
     nodes: [
-      // oblongs
       { id: 'START', label: 'START',  type: 'start',  x: 200,  y:  60 },
       { id: 'ACCEPT',label: 'ACCEPT', type: 'accept', x:1100,  y: 860 },
-      // reject terminals
       { id: 'rj1',  label: 'REJECT', type: 'reject', x:  50,  y: 160 },
       { id: 'rj2',  label: 'REJECT', type: 'reject', x: 380,  y:  60 },
       { id: 'rj3',  label: 'REJECT', type: 'reject', x:  50,  y: 300 },
@@ -36,8 +32,7 @@ const PDA_CONFIGS = {
       { id: 'rj7',  label: 'REJECT', type: 'reject', x: 620,  y: 360 },
       { id: 'rj8',  label: 'REJECT', type: 'reject', x: 280,  y: 580 },
       { id: 'rj9',  label: 'REJECT', type: 'reject', x: 780,  y: 360 },
-      { id: 'rj10', label: 'REJECT', type: 'reject', x: 660,  y: 640 },
-      // decision diamonds
+      { id: 'rj10', label: 'REJECT', type: 'reject', x: 880,  y: 500 },
       { id: 'R1',  label: 'R1',  type: 'state', x: 200,  y: 160 },
       { id: 'R2',  label: 'R2',  type: 'state', x: 380,  y: 160 },
       { id: 'R3',  label: 'R3',  type: 'state', x: 200,  y: 300 },
@@ -96,7 +91,6 @@ const PDA_CONFIGS = {
     nodes: [
       { id: 'START',  label: 'START',  type: 'start',  x:  130, y:  80 },
       { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 2440, y: 340 },
-      // REJECT terminals
       { id: 'rjS1',  label: 'REJECT', type: 'reject', x:   30, y: 160 },
       { id: 'rjS2',  label: 'REJECT', type: 'reject', x:  310, y:  40 },
       { id: 'rjS3',  label: 'REJECT', type: 'reject', x:  460, y:  40 },
@@ -114,7 +108,6 @@ const PDA_CONFIGS = {
       { id: 'rjS18', label: 'REJECT', type: 'reject', x: 1280, y: 660 },
       { id: 'rjS22', label: 'REJECT', type: 'reject', x: 2040, y: 200 },
       { id: 'rjS23', label: 'REJECT', type: 'reject', x: 2240, y: 200 },
-      // S-state diamonds
       { id: 'S1',  label: 'S1',  type: 'state', x:  130, y: 160 },
       { id: 'S2',  label: 'S2',  type: 'state', x:  310, y: 160 },
       { id: 'S3',  label: 'S3',  type: 'state', x:  460, y: 160 },
@@ -189,7 +182,6 @@ const PDA_CONFIGS = {
       { src: 'S23B',tgt: 'S23A',  label: 'b', curve: 1.5, sweep: 1 },
       { src: 'S30', tgt: 'S30',   label: 'a,b' },
       { src: 'S30', tgt: 'ACCEPT',label: 'Δ' },
-      // S17/S18 branch
       { src: 'S17', tgt: 'S12',   label: 'a', curve: 1.4, sweep: 0 },
       { src: 'S17', tgt: 'S18',   label: 'b' },
       { src: 'S17', tgt: 'rjS17', label: 'Δ' },
@@ -207,7 +199,6 @@ const nodeMap = computed(() => {
   return m
 })
 
-// Edge point on an OBLONG (ellipse approximation)
 const getOblongEdge = (cx, cy, tx, ty) => {
   const dx = tx - cx, dy = ty - cy
   const dist = Math.sqrt(dx*dx + dy*dy)
@@ -217,7 +208,6 @@ const getOblongEdge = (cx, cy, tx, ty) => {
   return { x: cx + t*nx, y: cy + t*ny }
 }
 
-// Edge point on a DIAMOND  (L1 boundary formula)
 const getDiamondEdge = (cx, cy, tx, ty) => {
   const dx = tx - cx, dy = ty - cy
   const dist = Math.sqrt(dx*dx + dy*dy)
@@ -238,7 +228,6 @@ const linkData = computed(() => {
     const tn = nodeMap.value[lnk.tgt]
     if (!sn || !tn) return { ...lnk, d: '', lx: 0, ly: 0, isSelf: false }
 
-    // Self-loop
     if (lnk.src === lnk.tgt) {
       const cx = sn.x, cy = sn.y
       const lr = 18, ex = 10, ey = (sn.type === 'state' ? DH : OH)
@@ -251,7 +240,6 @@ const linkData = computed(() => {
     const dx = te.x - se.x, dy = te.y - se.y
     const dist = Math.sqrt(dx*dx + dy*dy)
 
-    // Straight line (curve > 1000)
     if (lnk.curve && lnk.curve > 1000) {
       const d = `M${se.x},${se.y} L${te.x},${te.y}`
       return { ...lnk, d, lx: (se.x+te.x)/2, ly: (se.y+te.y)/2 - 8, isSelf: false }
@@ -275,7 +263,7 @@ const nodeColor = (n) => {
   if (n.type === 'accept') return '#22c55e'
   if (n.type === 'start')  return '#3b82f6'
   if (n.type === 'reject') return '#ef4444'
-  return '#eab308'   // decision diamond — yellow
+  return '#eab308'
 }
 
 const viewBox = computed(() => {
@@ -285,12 +273,134 @@ const viewBox = computed(() => {
   return `${Math.min(...xs)-OW-pad} ${Math.min(...ys)-DH-pad} ${Math.max(...xs)-Math.min(...xs)+OW*2+pad*2} ${Math.max(...ys)-Math.min(...ys)+OH*2+pad*2}`
 })
 
-// Start-arrow source x
 const startX = computed(() => {
   const sn = pda.value.nodes.find(n => n.type === 'start')
   return sn ? sn.x - OW : 0
 })
 const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?? 0)
+
+// ── Animation ────────────────────────────────────────────────────────────────
+
+const animPath  = ref([])
+const animIndex = ref(-1)
+let   animTimer = null
+
+const activeNodeId  = computed(() => animPath.value[animIndex.value]?.nodeId ?? null)
+const activeLinkIdx = computed(() => animPath.value[animIndex.value]?.linkIdx ?? -1)
+const animDone      = computed(() => animPath.value.length > 0 && animIndex.value >= animPath.value.length - 1)
+const animAccepted  = computed(() => animDone.value && animPath.value.at(-1)?.nodeId === 'ACCEPT')
+const animCharIdx   = computed(() => animPath.value[animIndex.value]?.charIdx ?? -1)
+const animCurrentChar = computed(() => {
+  const c = animPath.value[animIndex.value]?.char
+  return c && c !== 'Δ' ? c : null
+})
+
+const tape = computed(() => {
+  if (!props.testString) return []
+  return props.testString.split('').map((ch, i) => {
+    if (animIndex.value <= 0) return { ch, status: 'pending' }
+    const idx = animCharIdx.value
+    if (idx >= props.testString.length) return { ch, status: 'done' }
+    if (i < idx)  return { ch, status: 'done' }
+    if (i === idx) return { ch, status: 'active' }
+    return { ch, status: 'pending' }
+  })
+})
+
+const buildPath = (input) => {
+  const transMap = {}
+  pda.value.links.forEach((lnk, idx) => {
+    if (!transMap[lnk.src]) transMap[lnk.src] = []
+    transMap[lnk.src].push({ ...lnk, idx })
+  })
+
+  const path = []
+  let node = 'START'
+  let pos  = 0
+  const max = (input.length + 1) * 10 + 40
+
+  for (let step = 0; step < max; step++) {
+    const char = pos < input.length ? input[pos] : null
+    path.push({ nodeId: node, linkIdx: -1, charIdx: pos, char: char ?? 'Δ' })
+
+    if (node === 'ACCEPT' || node.startsWith('rj')) break
+
+    const avail = transMap[node] || []
+    let matched = null
+
+    // priority 1 — match current character
+    if (char !== null) {
+      for (const t of avail) {
+        if (t.label.split(',').map(s => s.trim()).includes(char)) { matched = t; break }
+      }
+    }
+    // priority 2 — epsilon / Δ transition
+    if (!matched) {
+      for (const t of avail) {
+        const parts = t.label.split(',').map(s => s.trim())
+        if (parts.includes('Δ') || parts.includes('')) { matched = t; break }
+      }
+    }
+
+    if (!matched) break
+    path[path.length - 1].linkIdx = matched.idx
+
+    // advance position only when a real character was consumed
+    if (char !== null && matched.label.split(',').map(s => s.trim()).includes(char)) pos++
+
+    node = matched.tgt
+  }
+  return path
+}
+
+const doReset = () => {
+  clearInterval(animTimer); animTimer = null
+  animIndex.value = -1
+  animPath.value  = []
+}
+
+const runAuto = () => {
+  doReset()
+  if (props.testString === null || props.testString === undefined) return
+
+  const path = buildPath(props.testString)
+  if (!path.length) return
+
+  animPath.value  = path
+  animIndex.value = 0
+  let idx = 0
+
+  animTimer = setInterval(() => {
+    if (idx < path.length - 1) { idx++; animIndex.value = idx }
+    else { clearInterval(animTimer); animTimer = null }
+  }, 800)
+}
+
+watch(() => props.simKey,     () => { if (props.testString != null) runAuto() })
+watch(() => props.testString, (v)  => { v != null ? runAuto() : doReset() })
+watch(() => props.problemId,  ()   => doReset())
+onUnmounted(() => clearInterval(animTimer))
+
+// ── Node / link visual helpers ───────────────────────────────────────────────
+
+const glowColor = computed(() => {
+  if (!animDone.value) return '#f59e0b'
+  return animAccepted.value ? '#22c55e' : '#ef4444'
+})
+
+const nodeStroke      = (n) => activeNodeId.value === n.id ? glowColor.value : 'white'
+const nodeStrokeWidth = (n) => activeNodeId.value === n.id ? '4' : '2'
+const nodeFilter      = (n) =>
+  activeNodeId.value === n.id ? `drop-shadow(0 0 9px ${glowColor.value})` : 'none'
+
+const linkStroke      = (i) => activeLinkIdx.value === i ? '#f59e0b' : '#475569'
+const linkStrokeWidth = (i) => activeLinkIdx.value === i ? '3'       : '1.7'
+const linkMarker      = (lnk, i) => {
+  const active = activeLinkIdx.value === i
+  return lnk.isSelf ? (active ? 'url(#pda-arr-active-s)' : 'url(#pda-arr-s)')
+                    : (active ? 'url(#pda-arr-active)'   : 'url(#pda-arr)')
+}
+const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
 </script>
 
 <template>
@@ -333,6 +443,51 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
       <span class="note-text">Δ = blank / bottom-of-stack symbol &nbsp;|&nbsp; Diamond = READ node &nbsp;|&nbsp; Double-border oblong = accept</span>
     </div>
 
+    <!-- Simulation status (visible when a string is being traced) -->
+    <div v-if="animPath.length > 0" class="simulation-status-card">
+
+      <!-- Tape -->
+      <div v-if="tape.length > 0" class="tape-section">
+        <div class="section-label">Tape</div>
+        <div class="tape-container no-scrollbar-x">
+          <div v-for="(cell, i) in tape" :key="i" :class="['tape-cell', cell.status]">
+            {{ cell.ch }}
+          </div>
+        </div>
+      </div>
+
+      <!-- State + reading char + result -->
+      <div class="status-row">
+        <div class="current-state-box" v-if="activeNodeId">
+          <span class="s-label">Current State</span>
+          <div :class="['state-badge', animDone ? (animAccepted ? 'ok' : 'fail') : 'active']">
+            {{ activeNodeId }}
+          </div>
+        </div>
+
+        <div class="read-char-box" v-if="animCurrentChar != null">
+          <span class="s-label">Reading</span>
+          <div class="char-badge">{{ animCurrentChar }}</div>
+        </div>
+
+        <div class="read-char-box" v-else-if="animIndex > 0">
+          <span class="s-label">Reading</span>
+          <div class="char-badge delta">Δ</div>
+        </div>
+
+        <div class="result-banner-box">
+          <transition name="pop">
+            <div v-if="animDone" :class="['banner', animAccepted ? 'banner-ok' : 'banner-fail']">
+              <span v-if="animAccepted">✓ String Accepted</span>
+              <span v-else-if="!props.testString">✕ Empty string rejected</span>
+              <span v-else>✕ String Rejected</span>
+            </div>
+          </transition>
+        </div>
+      </div>
+
+    </div>
+
     <!-- Diagram -->
     <div class="pda-viz-card">
       <div class="viz-head">Pushdown Automata Diagram</div>
@@ -345,6 +500,12 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
             <marker id="pda-arr-s" viewBox="0 -5 10 10" refX="9" refY="0" markerWidth="6" markerHeight="6" orient="auto">
               <path d="M0,-5L10,0L0,5" fill="#475569"/>
             </marker>
+            <marker id="pda-arr-active" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,-5L10,0L0,5" fill="#f59e0b"/>
+            </marker>
+            <marker id="pda-arr-active-s" viewBox="0 -5 10 10" refX="9" refY="0" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,-5L10,0L0,5" fill="#f59e0b"/>
+            </marker>
           </defs>
 
           <!-- Entry arrow -->
@@ -356,11 +517,13 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
 
           <!-- Edges -->
           <g v-for="(lnk, i) in linkData" :key="'e'+i">
-            <path :d="lnk.d" fill="none" stroke="#475569" stroke-width="1.7"
-              :marker-end="lnk.isSelf ? 'url(#pda-arr-s)' : 'url(#pda-arr)'" />
+            <path :d="lnk.d" fill="none"
+              :stroke="linkStroke(i)"
+              :stroke-width="linkStrokeWidth(i)"
+              :marker-end="linkMarker(lnk, i)" />
             <text v-if="lnk.label"
               :x="lnk.lx" :y="lnk.ly"
-              font-size="11" fill="#dc2626" font-weight="700"
+              font-size="11" :fill="labelFill(i)" font-weight="700"
               text-anchor="middle" font-family="Courier New, monospace"
               style="paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round"
             >{{ lnk.label }}</text>
@@ -368,21 +531,24 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
 
           <!-- Nodes -->
           <g v-for="node in pda.nodes" :key="node.id">
-            <!-- DIAMOND for decision states -->
             <polygon
               v-if="node.type === 'state'"
               :points="`${node.x},${node.y-DH} ${node.x+DW},${node.y} ${node.x},${node.y+DH} ${node.x-DW},${node.y}`"
-              :fill="nodeColor(node)" stroke="white" stroke-width="2"
+              :fill="nodeColor(node)"
+              :stroke="nodeStroke(node)"
+              :stroke-width="nodeStrokeWidth(node)"
+              :style="{ filter: nodeFilter(node) }"
             />
-            <!-- OBLONG for start/reject/accept -->
             <rect
               v-else
               :x="node.x-OW" :y="node.y-OH"
               :width="OW*2" :height="OH*2"
               :rx="OH" :ry="OH"
-              :fill="nodeColor(node)" stroke="white" stroke-width="2"
+              :fill="nodeColor(node)"
+              :stroke="nodeStroke(node)"
+              :stroke-width="nodeStrokeWidth(node)"
+              :style="{ filter: nodeFilter(node) }"
             />
-            <!-- Double border for accept -->
             <rect
               v-if="node.type === 'accept'"
               :x="node.x-OW+4" :y="node.y-OH+4"
@@ -390,7 +556,6 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
               :rx="OH-4" :ry="OH-4"
               fill="none" stroke="white" stroke-width="1.5"
             />
-            <!-- Label -->
             <text
               :x="node.x" :y="node.y+4.5"
               font-size="11" fill="white" font-weight="700"
@@ -419,10 +584,42 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
 .regex-label { font-size:11px; font-weight:600; color:#94a3b8; letter-spacing:0.06em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
 .regex-code { font-family:'Courier New',monospace; font-size:13px; color:#334155; word-break:break-all; line-height:1.6; }
 
-.notation-card { display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.9rem; font-size:12px; color:#475569; }
+.notation-card { display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.9rem; }
 .note-text { font-size:12px; color:#475569; }
+
+/* Simulation status card */
+.simulation-status-card { border:1px solid #e2e8f0; border-radius:10px; background:#fff; padding:12px; display:flex; flex-direction:column; gap:12px; }
+
+.section-label { font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; }
+.s-label { font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; display:block; margin-bottom:2px; }
+
+.tape-container { display:flex; gap:4px; padding:4px 0; overflow-x:auto; }
+.tape-cell { min-width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; border-radius:6px; font-family:monospace; font-weight:bold; font-size:14px; transition:all 0.2s; background:#f8fafc; }
+.tape-cell.done   { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
+.tape-cell.active { background:#fffbeb; color:#d97706; border-color:#fde68a; transform:translateY(-2px); box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); }
+
+.status-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+
+.state-badge { padding:4px 12px; border-radius:6px; font-weight:bold; font-size:13px; border:1px solid transparent; }
+.state-badge.active { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+.state-badge.ok     { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+.state-badge.fail   { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+
+.char-badge { padding:4px 10px; background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:6px; font-weight:bold; font-family:monospace; }
+.char-badge.delta { background:#f5f3ff; color:#7c3aed; border-color:#ddd6fe; }
+
+.result-banner-box { }
+.banner { padding:6px 14px; border-radius:6px; font-size:13px; font-weight:bold; }
+.banner-ok   { background:#16a34a; color:white; }
+.banner-fail { background:#dc2626; color:white; }
 
 .pda-viz-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
 .viz-head { padding:8px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; }
 .image-viewport { padding:20px; display:flex; justify-content:center; background:#fafafa; overflow-x:auto; }
+
+.no-scrollbar-x { scrollbar-width:none; }
+.no-scrollbar-x::-webkit-scrollbar { display:none; }
+
+.pop-enter-active { animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from { transform:scale(0.9); opacity:0; } to { transform:scale(1); opacity:1; } }
 </style>

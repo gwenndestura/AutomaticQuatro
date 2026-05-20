@@ -124,6 +124,8 @@ const SIM_TABS = [
         <PDAViz
           v-else-if="activeAutomata === 'pda'"
           :problemId="currentProblem.id"
+          :testString="currentTestString"
+          :simKey="simulationKey"
         />
       </div>
 
