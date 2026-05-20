@@ -32,6 +32,7 @@ const PDA_CONFIGS = {
       { id: 'rj3',  label: 'REJECT', type: 'reject', x:  50,  y: 300 },
       { id: 'rj4',  label: 'REJECT', type: 'reject', x: 560,  y: 300 },
       { id: 'rj5',  label: 'REJECT', type: 'reject', x:  50,  y: 440 },
+      { id: 'rj6',  label: 'REJECT', type: 'reject', x: 460,  y: 340 },
       { id: 'rj7',  label: 'REJECT', type: 'reject', x: 620,  y: 360 },
       { id: 'rj8',  label: 'REJECT', type: 'reject', x: 280,  y: 580 },
       { id: 'rj9',  label: 'REJECT', type: 'reject', x: 780,  y: 360 },
@@ -67,6 +68,7 @@ const PDA_CONFIGS = {
       { src: 'R4',  tgt: 'R6',   label: '1' },
       { src: 'R5',  tgt: 'rj5',  label: 'Δ' },
       { src: 'R5',  tgt: 'R6',   label: '0,1' },
+      { src: 'R6',  tgt: 'rj6',  label: 'Δ' },
       { src: 'R6',  tgt: 'R7',   label: '1' },
       { src: 'R6',  tgt: 'R8',   label: '0' },
       { src: 'R7',  tgt: 'rj7',  label: 'Δ' },
@@ -234,14 +236,14 @@ const linkData = computed(() => {
   return pda.value.links.map(lnk => {
     const sn = nodeMap.value[lnk.src]
     const tn = nodeMap.value[lnk.tgt]
-    if (!sn || !tn) return { ...lnk, d: '', lx: 0, ly: 0, isSelf: false }
+    if (!sn || !tn) return { ...lnk, d: '', textD: '', lx: 0, ly: 0, isSelf: false }
 
     // Self-loop
     if (lnk.src === lnk.tgt) {
       const cx = sn.x, cy = sn.y
       const lr = 18, ex = 10, ey = (sn.type === 'state' ? DH : OH)
       const d = `M${cx-ex},${cy-ey} A ${lr} ${lr} 0 1 1 ${cx+ex},${cy-ey}`
-      return { ...lnk, d, lx: cx, ly: cy - ey - 22, isSelf: true }
+      return { ...lnk, d, textD: d, lx: cx, ly: cy - ey - 22, isSelf: true }
     }
 
     const se = getEdge(sn, tn.x, tn.y)
@@ -252,7 +254,8 @@ const linkData = computed(() => {
     // Straight line (curve > 1000)
     if (lnk.curve && lnk.curve > 1000) {
       const d = `M${se.x},${se.y} L${te.x},${te.y}`
-      return { ...lnk, d, lx: (se.x+te.x)/2, ly: (se.y+te.y)/2 - 8, isSelf: false }
+      const textD = se.x <= te.x ? d : `M${te.x},${te.y} L${se.x},${se.y}`
+      return { ...lnk, d, textD, lx: (se.x+te.x)/2, ly: (se.y+te.y)/2 - 8, isSelf: false }
     }
 
     const snNum = parseInt(lnk.src.replace(/\D/g,'')) || 0
@@ -260,12 +263,15 @@ const linkData = computed(() => {
     const sweep = lnk.sweep !== undefined ? lnk.sweep : (snNum < tnNum ? 1 : 0)
     const dr    = dist * (lnk.curve || 1.3)
     const d     = `M${se.x},${se.y} A ${dr} ${dr} 0 0 ${sweep} ${te.x},${te.y}`
+    const textD = se.x <= te.x + 5
+      ? d
+      : `M${te.x},${te.y} A ${dr} ${dr} 0 0 ${sweep === 1 ? 0 : 1} ${se.x},${se.y}`
 
     const mx = (se.x+te.x)/2, my = (se.y+te.y)/2
     const perpX = -dy/dist, perpY = dx/dist
     const sag   = dist * 0.18
     const sign  = sweep === 1 ? -1 : 1
-    return { ...lnk, d, lx: mx+sign*perpX*sag, ly: my+sign*perpY*sag, isSelf: false }
+    return { ...lnk, d, textD, lx: mx+sign*perpX*sag, ly: my+sign*perpY*sag, isSelf: false }
   })
 })
 
@@ -343,6 +349,9 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
             <marker id="pda-arr-s" viewBox="0 -5 10 10" refX="9" refY="0" markerWidth="6" markerHeight="6" orient="auto">
               <path d="M0,-5L10,0L0,5" fill="#475569"/>
             </marker>
+            <template v-for="(lnk, i) in linkData" :key="`pda-tp-${i}`">
+              <path v-if="!lnk.isSelf" :id="`pda-tp-${i}`" :d="lnk.textD" fill="none" stroke="none"/>
+            </template>
           </defs>
 
           <!-- Entry arrow -->
@@ -356,12 +365,21 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
           <g v-for="(lnk, i) in linkData" :key="'e'+i">
             <path :d="lnk.d" fill="none" stroke="#475569" stroke-width="1.7"
               :marker-end="lnk.isSelf ? 'url(#pda-arr-s)' : 'url(#pda-arr)'" />
-            <text v-if="lnk.label"
+            <!-- Self-loop: regular positioned text -->
+            <text v-if="lnk.label && lnk.isSelf"
               :x="lnk.lx" :y="lnk.ly"
               font-size="11" fill="#dc2626" font-weight="700"
               text-anchor="middle" font-family="Courier New, monospace"
               style="paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round"
             >{{ lnk.label }}</text>
+            <!-- Arc: text along the path -->
+            <text v-else-if="lnk.label"
+              font-size="11" fill="#dc2626" font-weight="700"
+              font-family="Courier New, monospace"
+              dy="-4"
+              style="paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round">
+              <textPath :href="`#pda-tp-${i}`" startOffset="50%" text-anchor="middle">{{ lnk.label }}</textPath>
+            </text>
           </g>
 
           <!-- Nodes -->
