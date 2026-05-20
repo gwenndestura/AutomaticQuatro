@@ -300,7 +300,7 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
         <svg width="28" height="20" style="flex-shrink:0;vertical-align:middle">
           <polygon points="14,0 28,10 14,20 0,10" fill="#eab308"/>
         </svg>
-        <span class="leg">Decision state</span>
+        <span class="leg">READ</span>
         <svg width="36" height="18" style="flex-shrink:0;vertical-align:middle;margin-left:10px">
           <rect x="1" y="1" width="34" height="16" rx="8" fill="#3b82f6"/>
         </svg>
@@ -324,7 +324,7 @@ const startY = computed(() => pda.value.nodes.find(n => n.type === 'start')?.y ?
 
     <!-- Notation -->
     <div class="notation-card">
-      <span class="note-text">Δ = blank / bottom-of-stack symbol &nbsp;|&nbsp; Diamond = read / decision node &nbsp;|&nbsp; Double-border oblong = accept</span>
+      <span class="note-text">Δ = blank / bottom-of-stack symbol &nbsp;|&nbsp; Diamond = READ node &nbsp;|&nbsp; Double-border oblong = accept</span>
     </div>
 
     <!-- Diagram -->
