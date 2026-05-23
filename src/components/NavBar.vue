@@ -25,17 +25,9 @@ onMounted(() => {
   <nav class="navbar">
 
     <!-- Brand -->
-    <div class="brand">
-      <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-        <circle cx="14" cy="14" r="12.5" stroke="#4caf50" stroke-width="2"/>
-        <circle cx="14" cy="14" r="3.5" fill="#4caf50"/>
-        <line x1="14" y1="1.5" x2="14" y2="6.5"  stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="14" y1="21.5" x2="14" y2="26.5" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="1.5" y1="14" x2="6.5" y2="14"   stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="21.5" y1="14" x2="26.5" y2="14" stroke="#4caf50" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-      <span class="brand-name">Automata Simulator</span>
-    </div>
+    <button class="brand" @click="changeView('simulator')" title="Go to home">
+      <img src="../assets/aqlogo.png" alt="AutomaticQuatro" class="brand-logo" />
+    </button>
 
     <!-- Nav tabs -->
     <div class="nav-tabs" role="tablist">
@@ -96,13 +88,15 @@ onMounted(() => {
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
-.brand-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #d6edd9;
-  letter-spacing: -0.01em;
+.brand-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Tabs */
@@ -173,7 +167,7 @@ onMounted(() => {
 /* Responsive */
 @media (max-width: 600px) {
   .navbar { padding: 0 12px; }
-  .brand-name { display: none; }
+  .brand-logo { height: 28px; }
   .nav-tab { padding: 0 10px; font-size: 11px; }
 }
 </style>

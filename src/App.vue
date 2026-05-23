@@ -63,18 +63,25 @@ const SIM_TABS = [
     <!-- Left sidebar -->
     <aside class="sidebar">
 
-      <div class="sidebar-brand">
-        <span class="sidebar-brand-name">Automata Simulator</span>
-        <span class="sidebar-brand-sub">Theory of Formal Languages</span>
-      </div>
-
       <!-- Problem selection -->
       <div class="sidebar-section">
-        <div class="section-label">Problem</div>
+        <div class="section-label">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="margin-right:5px;vertical-align:middle">
+            <rect x="1" y="1" width="10" height="10" rx="2" stroke="#8c959f" stroke-width="1.5"/>
+            <path d="M4 6h4M6 4v4" stroke="#8c959f" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Select Problem
+        </div>
         <Problems :problems="problems" v-model="selectedProblemIndex" />
 
         <div class="regex-block">
-          <div class="regex-block-title">Regular Expression</div>
+          <div class="regex-block-title">
+            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true" style="margin-right:4px;vertical-align:middle">
+              <circle cx="5" cy="5" r="4" stroke="#8c959f" stroke-width="1.3"/>
+              <path d="M5 3v2.5L6.5 7" stroke="#8c959f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Regular Expression
+          </div>
           <code class="regex-text">{{ currentRegex }}</code>
         </div>
       </div>
@@ -83,7 +90,12 @@ const SIM_TABS = [
 
       <!-- Test inputs -->
       <div class="sidebar-section">
-        <div class="section-label">Test Strings</div>
+        <div class="section-label">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="margin-right:5px;vertical-align:middle">
+            <path d="M2 6h8M8 4l2 2-2 2" stroke="#8c959f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Test Strings
+        </div>
         <InputArea
           :regexStr="currentRegex"
           @simulate-string="runSimulation"
@@ -106,6 +118,9 @@ const SIM_TABS = [
             <span class="vt-label">{{ tab.label }}</span>
             <span class="vt-full">{{ tab.full }}</span>
           </button>
+        </div>
+        <div class="viz-header-right">
+          <span class="viz-header-hint">Select a tab · Enter a string · Click Run</span>
         </div>
       </div>
 
@@ -146,80 +161,69 @@ const SIM_TABS = [
 .workspace {
   display: flex;
   min-height: calc(100vh - 60px);
+  background: #f4f6f8;
 }
 
 /* ── Left sidebar ─────────────────────────────────────────── */
 .sidebar {
-  width: 340px;
+  width: 320px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e1e4e8;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
 }
 
-.sidebar-brand {
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid #f0f2f4;
-  flex-shrink: 0;
-}
-.sidebar-brand-name {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-.sidebar-brand-sub {
-  display: block;
-  font-size: 11px;
-  color: #8c959f;
-  margin-top: 2px;
-  letter-spacing: 0.02em;
-}
 
 .sidebar-section {
-  padding: 16px 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
 }
 
 .section-label {
+  display: flex;
+  align-items: center;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: #8c959f;
 }
 
 .regex-block {
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-left: 3px solid #22c55e;
+  border-radius: 8px;
   padding: 10px 12px;
 }
 .regex-block-title {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: #8c959f;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 .regex-text {
   font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
-  font-size: 11.5px;
+  font-size: 11px;
   color: #0550ae;
   word-break: break-all;
-  line-height: 1.65;
+  line-height: 1.7;
   display: block;
 }
 
 .sidebar-divider {
   height: 1px;
-  background: #f0f2f4;
+  background: linear-gradient(to right, transparent, #e8ecf0, transparent);
+  margin: 0 18px;
   flex-shrink: 0;
 }
 
@@ -229,14 +233,18 @@ const SIM_TABS = [
   min-width: 0;
   display: flex;
   flex-direction: column;
-  background: #f6f8fa;
+  background: #f4f6f8;
 }
 
 .viz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #ffffff;
   border-bottom: 1px solid #e1e4e8;
-  padding: 0 24px;
+  padding: 0 20px 0 4px;
   flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .viz-tabs {
@@ -248,42 +256,61 @@ const SIM_TABS = [
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 14px 20px 12px;
+  padding: 13px 20px 11px;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 2.5px solid transparent;
   background: none;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #57606a;
-  gap: 1px;
+  color: #6b7280;
+  gap: 2px;
   margin-bottom: -1px;
 }
-.viz-tab-btn:hover { color: #0f172a; }
+.viz-tab-btn:hover { color: #0f172a; background: #f9fafb; }
 .viz-tab-btn.is-active {
-  color: #1a7f37;
-  border-bottom-color: #1a7f37;
+  color: #16a34a;
+  border-bottom-color: #22c55e;
+  background: #f0fdf4;
 }
 .vt-label {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: 0.01em;
 }
 .vt-full {
-  font-size: 10px;
+  font-size: 9.5px;
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.65;
+  letter-spacing: 0.01em;
+}
+
+.viz-header-right {
+  display: flex;
+  align-items: center;
+}
+.viz-header-hint {
+  font-size: 10.5px;
+  color: #b0b8c1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .viz-content {
   flex: 1;
   overflow-y: auto;
   scroll-margin-top: 60px;
+  padding: 4px;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .workspace { flex-direction: column; }
-  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e1e4e8; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e1e4e8; box-shadow: none; }
   .main-panel { min-height: 60vh; }
+  .viz-header-hint { display: none; }
+}
+@media (max-width: 520px) {
+  .sidebar-section { padding: 14px 14px; }
 }
 </style>

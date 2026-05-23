@@ -147,12 +147,6 @@ const currentCharIdx = computed(() => simResult.value ? (steps.value[stepIndex.v
 
 const resultAccepted = computed(() => done.value && !!simResult.value?.accepted)
 
-const isValidInput = computed(() => {
-    if (props.testString === null || props.testString === undefined) return false;
-    const result = runSimulation(props.testString)
-    return result.accepted
-})
-
 const tape = computed(() => {
   if (!props.testString) return []
   return props.testString.split('').map((ch, i) => {
@@ -166,25 +160,29 @@ const tape = computed(() => {
 
 const runSimulation = (input) => {
   const d = dfa.value
+  const trapIds = new Set(d.nodes.filter(n => n.type === 'trap').map(n => n.id))
   const stepsList = [{ state: d.start, charIndex: -1, char: null }]
   let current = d.start
   for (let i = 0; i < input.length; i++) {
     const ch = input[i]
     let next = d.transitions[current]?.[ch]
-    
+
     // Handle split transitions string like "0, 1"
     if (!next) {
         for (const [key, val] of Object.entries(d.transitions[current])) {
             if (key.includes(ch)) next = val;
         }
     }
-    
+
     if (next === undefined) {
       stepsList.push({ state: null, charIndex: i, char: ch, dead: true })
       return { steps: stepsList, accepted: false }
     }
     current = next
     stepsList.push({ state: current, charIndex: i, char: ch })
+    if (trapIds.has(current)) {
+      return { steps: stepsList, accepted: false }
+    }
   }
   return { steps: stepsList, accepted: d.accept.includes(current) }
 }
@@ -491,50 +489,47 @@ onUnmounted(() => {
       <code class="regex-code">{{ problemRegex }}</code>
     </div>
 
-    <div v-if="simResult && !isValidInput" class="invalid-warning">
-      <span>⚠️ Invalid String for this Automaton</span>
-    </div>
+    <!-- Simulation panel -->
+    <div class="sim-panel" :class="done ? (resultAccepted ? 'sim-ok' : 'sim-fail') : 'sim-running'">
 
-    <!-- Simulation Controls Area -->
-    <div class="simulation-status-card">
-      
-      <!-- Tape -->
-      <div v-if="tape.length > 0" class="tape-section">
-        <div class="section-label">Tape</div>
-        <div class="tape-container no-scrollbar-x">
-          <div
-            v-for="(cell, i) in tape"
-            :key="i"
-            :class="['tape-cell', cell.status]"
-          >
-            {{ cell.ch }}
+      <!-- Left: state + reading -->
+      <div class="sim-left">
+        <div class="sim-state-wrap" v-if="simResult && currentState">
+          <span class="sim-micro-label">State</span>
+          <span :class="['sim-state', done ? (resultAccepted ? 'ok' : 'fail') : 'running']">
+            {{ currentState }}
+          </span>
+        </div>
+        <div v-if="simResult && currentState" class="sim-divider-v"></div>
+        <div class="sim-reading-wrap">
+          <span class="sim-micro-label">Reading</span>
+          <span v-if="currentStep?.char != null" class="sim-char">{{ currentStep.char }}</span>
+          <span v-else class="sim-char muted">—</span>
+        </div>
+      </div>
+
+      <!-- Center: tape -->
+      <div class="sim-tape-wrap" v-if="tape.length > 0">
+        <div class="sim-tape no-scrollbar-x">
+          <div v-for="(cell, i) in tape" :key="i" :class="['sim-cell', cell.status]">
+            <span class="sim-cell-ch">{{ cell.ch }}</span>
+            <span v-if="cell.status === 'active'" class="sim-cell-head">▲</span>
           </div>
         </div>
       </div>
 
-      <!-- State & Result -->
-      <div class="status-row">
-        <div class="current-state-box" v-if="simResult && currentState">
-          <span class="label">Current State</span>
-          <div :class="['state-badge', done ? (resultAccepted ? 'ok' : 'fail') : 'active']">
-            {{ currentState }}
+      <!-- Right: result -->
+      <div class="sim-right">
+        <transition name="pop">
+          <div v-if="done" :class="['sim-result', resultAccepted ? 'result-ok' : 'result-fail']">
+            <span class="result-icon">{{ resultAccepted ? '✓' : '✕' }}</span>
+            <span class="result-text">{{ resultAccepted ? 'Accepted' : 'Rejected' }}</span>
           </div>
-        </div>
-
-        <div class="read-char-box" v-if="currentStep?.char != null">
-          <span class="label">Reading</span>
-          <div class="char-badge">{{ currentStep.char }}</div>
-        </div>
-
-        <div class="result-banner-box">
-          <transition name="pop">
-            <div v-if="done" :class="['banner', resultAccepted ? 'banner-ok' : 'banner-fail']">
-              <span v-if="resultAccepted">✓ String Accepted</span>
-              <span v-else-if="props.testString === ''">✕ null string rejected</span>
-              <span v-else>✕ String Rejected</span>
-            </div>
-          </transition>
-        </div>
+          <div v-else class="sim-result result-running">
+            <span class="result-icon spin">◌</span>
+            <span class="result-text">Tracing…</span>
+          </div>
+        </transition>
       </div>
 
     </div>
@@ -552,16 +547,14 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-
-    max-width: 900px;
-    margin: 20px auto;
+    max-width: 920px;
+    margin: 16px auto;
     padding: 1.2rem;
-
     background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
     font-family: 'Inter', 'Segoe UI', sans-serif;
+    border: 1px solid #e8ecf0;
 }
 
 /* Header */
@@ -571,6 +564,8 @@ onUnmounted(() => {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f4f8;
 }
 .header-left {
     display: flex;
@@ -578,182 +573,224 @@ onUnmounted(() => {
     gap: 0.6rem;
 }
 .badge {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 5px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #cbd5e1;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    border-radius: 6px;
+    text-transform: uppercase;
 }
 .title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e1e2e;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
 }
 .header-right {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    flex-wrap: wrap;
 }
 .dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     display: inline-block;
+    flex-shrink: 0;
 }
 .start-dot  { background: #2563eb; }
-.state-dot  { background: #f59e0b; margin-left: 0.6rem; }
-.accept-dot { background: #10b981; margin-left: 0.6rem; }
-.trap-dot   { background: #ef4444; margin-left: 0.6rem; }
+.state-dot  { background: #f59e0b; margin-left: 0.5rem; }
+.accept-dot { background: #10b981; margin-left: 0.5rem; }
+.trap-dot   { background: #ef4444; margin-left: 0.5rem; }
 .leg {
-    font-size: 12px;
+    font-size: 11.5px;
     color: #6b7280;
+    font-weight: 500;
 }
 
 /* Regex */
 .regex-wrap {
     display: flex;
     align-items: flex-start;
-    gap: 0.6rem;
+    gap: 0.7rem;
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    border: 1.5px solid #e2e8f0;
+    border-left: 3px solid #22c55e;
     border-radius: 8px;
-    padding: 0.6rem 0.9rem;
+    padding: 0.65rem 0.9rem;
 }
 .regex-label {
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
     color: #94a3b8;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     padding-top: 2px;
     white-space: nowrap;
 }
 .regex-code {
     font-family: 'Courier New', monospace;
-    font-size: 13px;
-    color: #334155;
+    font-size: 12.5px;
+    color: #1e40af;
     word-break: break-all;
-    line-height: 1.6;
+    line-height: 1.65;
 }
 
-/* Simulation status card */
-.simulation-status-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: #fff;
-    padding: 12px;
+/* ── Simulation panel ───────────────────────────────────────── */
+.sim-panel {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-radius: 12px;
+    border: 1.5px solid #e8ecf0;
+    background: #ffffff;
+    overflow: hidden;
+    min-height: 68px;
+    transition: border-color 0.3s;
+}
+.sim-panel.sim-ok   { border-color: #86efac; }
+.sim-panel.sim-fail { border-color: #fca5a5; }
+
+.sim-left {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    background: #f8fafc;
+    border-right: 1.5px solid #e8ecf0;
+    height: 100%;
+    min-height: 68px;
+}
+.sim-state-wrap, .sim-reading-wrap {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.section-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-}
-
-/* Tape */
-.tape-container {
-    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
     gap: 4px;
-    padding: 4px 0;
-    overflow-x: auto;
 }
-.tape-cell {
-    min-width: 30px;
-    height: 30px;
+.sim-micro-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+.sim-state {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1.5px solid transparent;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+.sim-state.running { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+.sim-state.ok      { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+.sim-state.fail    { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
+
+.sim-char {
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    font-weight: 800;
+    color: #d97706;
+    background: #fffbeb;
+    border: 1.5px solid #fcd34d;
+    border-radius: 6px;
+    padding: 2px 10px;
+    min-width: 32px;
+    text-align: center;
+}
+.sim-char.muted { color: #cbd5e1; background: #f8fafc; border-color: #e2e8f0; }
+
+.sim-divider-v {
+    width: 1px;
+    align-self: stretch;
+    background: #e8ecf0;
+    margin: 10px 0;
+}
+
+.sim-tape-wrap {
+    flex: 1;
+    min-width: 0;
+    padding: 0 14px;
+    overflow: hidden;
+}
+.sim-tape {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 10px 0 12px;
+    align-items: flex-end;
+}
+.sim-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+.sim-cell-ch {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     font-family: monospace;
-    font-weight: bold;
-    font-size: 14px;
-    transition: all 0.2s;
+    font-weight: 700;
+    font-size: 15px;
+    border: 1.5px solid #e2e8f0;
     background: #f8fafc;
+    color: #94a3b8;
+    transition: all 0.2s;
 }
-.tape-cell.done {
-    background: #f0fdf4;
-    color: #16a34a;
-    border-color: #bbf7d0;
-}
-.tape-cell.active {
-    background: #fffbeb;
-    color: #d97706;
-    border-color: #fde68a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.sim-cell.done .sim-cell-ch   { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
+.sim-cell.active .sim-cell-ch { background: #fffbeb; color: #d97706; border-color: #fcd34d; box-shadow: 0 4px 12px rgba(217,119,6,0.22); transform: translateY(-3px); }
+.sim-cell-head {
+    font-size: 9px;
+    color: #f59e0b;
+    line-height: 1;
 }
 
-/* Status Row */
-.status-row {
+.sim-right {
+    flex-shrink: 0;
+    padding: 0 16px;
+    border-left: 1.5px solid #e8ecf0;
+    height: 100%;
+    min-height: 68px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    background: #f8fafc;
 }
+.sim-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 72px;
+}
+.result-icon { font-size: 20px; font-weight: 900; line-height: 1; }
+.result-text { font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.result-ok   .result-icon { color: #16a34a; }
+.result-ok   .result-text { color: #16a34a; }
+.result-fail .result-icon { color: #dc2626; }
+.result-fail .result-text { color: #dc2626; }
+.result-running .result-icon { color: #94a3b8; }
+.result-running .result-text { color: #94a3b8; }
 
-.label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #94a3b8;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 2px;
-}
-
-.state-badge {
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 13px;
-    border: 1px solid transparent;
-}
-.state-badge.active { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-.state-badge.ok     { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
-.state-badge.fail   { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
-
-.char-badge {
-    padding: 4px 10px;
-    background: #fffbeb;
-    color: #b45309;
-    border: 1px solid #fde68a;
-    border-radius: 6px;
-    font-weight: bold;
-    font-family: monospace;
-}
-
-.banner {
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: bold;
-}
-.banner-ok   { background: #16a34a; color: white; }
-.banner-fail { background: #dc2626; color: white; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 1.2s linear infinite; }
 
 /* Viz container */
 .viz-container {
-    border: 1px solid #f1f5f9;
-    border-radius: 8px;
-    background: #fafafa;
+    border: 1.5px solid #e8ecf0;
+    border-radius: 10px;
+    background: #fafbfc;
     overflow: hidden;
-}
-
-.invalid-warning {
-    background: #fef2f2;
-    color: #991b1b;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #fee2e2;
-    font-size: 13px;
-    font-weight: 500;
 }
 
 .pop-enter-active { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }

@@ -71,13 +71,14 @@ const PDA_CONFIGS = {
       { src: 'R7',  tgt: 'R10',  label: '0' },
       { src: 'R8',  tgt: 'rj8',  label: 'Δ' },
       { src: 'R8',  tgt: 'R11',  label: '0' },
+      { src: 'R8',  tgt: 'R7',   label: '1' },
       { src: 'R9',  tgt: 'rj9',  label: 'Δ' },
       { src: 'R9',  tgt: 'R12',  label: '1' },
-      { src: 'R9',  tgt: 'R10',  label: '0', curve: 10001 },
+      { src: 'R9',  tgt: 'R7',   label: '0', sweep: 1 },
       { src: 'R10', tgt: 'rj10', label: 'Δ' },
-      { src: 'R10', tgt: 'R13',  label: '1' },
-      { src: 'R10', tgt: 'R11',  label: '0', curve: 10001 },
-      { src: 'R11', tgt: 'R13',  label: '0,1', curve: 1.4, sweep: 1 },
+      { src: 'R10', tgt: 'R12',  label: '1' },
+      { src: 'R11', tgt: 'R13',  label: '0', curve: 1.4, sweep: 1 },
+      { src: 'R11', tgt: 'R12',  label: '1' },
       { src: 'R11', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
       { src: 'R12', tgt: 'R13',  label: '0,1', curve: 10001 },
       { src: 'R12', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
@@ -100,11 +101,13 @@ const PDA_CONFIGS = {
       { id: 'rjS7',  label: 'REJECT', type: 'reject', x:  720, y: 400 },
       { id: 'rjS8',  label: 'REJECT', type: 'reject', x:  920, y:  80 },
       { id: 'rjS9',  label: 'REJECT', type: 'reject', x: 1100, y:  80 },
+      { id: 'rjS11', label: 'REJECT', type: 'reject', x:  820, y: 260 },
       { id: 'rjS12', label: 'REJECT', type: 'reject', x: 1020, y: 440 },
       { id: 'rjS13', label: 'REJECT', type: 'reject', x: 1280, y: 440 },
       { id: 'rjS14', label: 'REJECT', type: 'reject', x: 1460, y: 600 },
       { id: 'rjS15', label: 'REJECT', type: 'reject', x: 1740, y:  80 },
       { id: 'rjS17', label: 'REJECT', type: 'reject', x: 1100, y: 660 },
+      { id: 'rjS21', label: 'REJECT', type: 'reject', x: 1960, y:  80 },
       { id: 'rjS18', label: 'REJECT', type: 'reject', x: 1280, y: 660 },
       { id: 'rjS22', label: 'REJECT', type: 'reject', x: 2040, y: 200 },
       { id: 'rjS23', label: 'REJECT', type: 'reject', x: 2240, y: 200 },
@@ -137,56 +140,60 @@ const PDA_CONFIGS = {
       { src: 'S1',  tgt: 'rjS1',  label: 'a,Δ' },
       { src: 'S1',  tgt: 'S2',    label: 'b' },
       { src: 'S2',  tgt: 'rjS2',  label: 'Δ' },
-      { src: 'S2',  tgt: 'S3',    label: 'b' },
-      { src: 'S2',  tgt: 'S4',    label: 'a' },
+      { src: 'S2',  tgt: 'S3',    label: 'a' },
+      { src: 'S2',  tgt: 'S4',    label: 'b' },
       { src: 'S3',  tgt: 'rjS3',  label: 'a,Δ' },
       { src: 'S3',  tgt: 'S5',    label: 'b', curve: 1.5, sweep: 1 },
       { src: 'S4',  tgt: 'rjS4',  label: 'a,Δ' },
       { src: 'S4',  tgt: 'S5',    label: 'b' },
       { src: 'S5',  tgt: 'S5',    label: 'a' },
-      { src: 'S5',  tgt: 'S6',    label: 'Δ', curve: 10001 },
+      { src: 'S5',  tgt: 'S6',    label: 'b', curve: 10001 },
       { src: 'S5',  tgt: 'rjS5',  label: 'Δ' },
       { src: 'S6',  tgt: 'rjS6',  label: 'Δ' },
-      { src: 'S6',  tgt: 'S6',    label: 'a' },
-      { src: 'S6',  tgt: 'S7',    label: 'b' },
+      { src: 'S6',  tgt: 'S6',    label: 'b' },
+      { src: 'S6',  tgt: 'S7',    label: 'a' },
       { src: 'S7',  tgt: 'rjS7',  label: 'Δ' },
-      { src: 'S7',  tgt: 'S8',    label: 'a' },
-      { src: 'S7',  tgt: 'S11',   label: 'b' },
-      { src: 'S8',  tgt: 'rjS8',  label: 'a,Δ' },
+      { src: 'S7',  tgt: 'S8',    label: 'b' },
+      { src: 'S8',  tgt: 'rjS8',  label: 'Δ' },
       { src: 'S8',  tgt: 'S9',    label: 'b' },
+      { src: 'S8',  tgt: 'S11',   label: 'a' },
       { src: 'S9',  tgt: 'rjS9',  label: 'b,Δ' },
-      { src: 'S9',  tgt: 'S12',   label: 'a' },
-      { src: 'S11', tgt: 'S11',   label: 'b' },
-      { src: 'S11', tgt: 'S12',   label: 'a' },
-      { src: 'S12', tgt: 'rjS12', label: 'Δ' },
+      { src: 'S9',  tgt: 'S8',    label: 'a', sweep: 1 },
+      { src: 'S11', tgt: 'S12',   label: 'b' },
+      { src: 'S11', tgt: 'rjS11', label: 'a,Δ' },
+      { src: 'S12', tgt: 'rjS12', label: 'b,Δ' },
       { src: 'S12', tgt: 'S13',   label: 'a' },
-      { src: 'S12', tgt: 'S17',   label: 'b', curve: 1.4, sweep: 1 },
       { src: 'S13', tgt: 'rjS13', label: 'Δ' },
       { src: 'S13', tgt: 'S14',   label: 'b' },
-      { src: 'S13', tgt: 'S20',   label: 'a', curve: 1.4, sweep: 0 },
-      { src: 'S14', tgt: 'rjS14', label: 'a,Δ' },
-      { src: 'S14', tgt: 'S15',   label: 'b' },
-      { src: 'S15', tgt: 'S20',   label: 'a,b', curve: 10001 },
+      { src: 'S13', tgt: 'S17',   label: 'a', curve: 1.4, sweep: 0 },
+      { src: 'S14', tgt: 'rjS14', label: 'Δ' },
+      { src: 'S14', tgt: 'S15',   label: 'a' },
+      { src: 'S14', tgt: 'S20',   label: 'b' },
+      { src: 'S15', tgt: 'S13',   label: 'b' },
+      { src: 'S15', tgt: 'rjS14', label: 'a,Δ' },
       { src: 'S20', tgt: 'S21',   label: 'b' },
       { src: 'S20', tgt: 'rjS15', label: 'a,Δ' },
-      { src: 'S21', tgt: 'S22A',  label: 'b' },
-      { src: 'S21', tgt: 'S22B',  label: 'Δ', curve: 1.4, sweep: 1 },
+      { src: 'S21', tgt: 'S22A',  label: 'a' },
+      { src: 'S21', tgt: 'S22B',  label: 'b', curve: 1.4, sweep: 1 },
+      { src: 'S21', tgt: 'rjS21', label: 'Δ' },
       { src: 'S22A',tgt: 'rjS22', label: 'Δ' },
-      { src: 'S22A',tgt: 'S22A',  label: 'a,b' },
+      { src: 'S22A',tgt: 'S22A',  label: 'a' },
       { src: 'S22A',tgt: 'S23A',  label: 'b', curve: 10001 },
-      { src: 'S22B',tgt: 'S23B',  label: 'b' },
+      { src: 'S22B',tgt: 'S23B',  label: 'a' },
+      { src: 'S22B',tgt: 'S22B',  label: 'b' },
       { src: 'S22B',tgt: 'rjS22', label: 'Δ', curve: 1.4, sweep: 0 },
       { src: 'S23A',tgt: 'rjS23', label: 'Δ' },
-      { src: 'S23A',tgt: 'S30',   label: 'b', curve: 10001 },
+      { src: 'S23A',tgt: 'S30',   label: 'a', curve: 10001 },
+      { src: 'S23A',tgt: 'S22A',  label: 'b' },
       { src: 'S23B',tgt: 'S30',   label: 'b' },
-      { src: 'S23B',tgt: 'S23A',  label: 'b', curve: 1.5, sweep: 1 },
+      { src: 'S23B',tgt: 'S22A',  label: 'a', curve: 1.5, sweep: 1 },
+      { src: 'S23B',tgt: 'rjS23', label: 'Δ' },
       { src: 'S30', tgt: 'S30',   label: 'a,b' },
       { src: 'S30', tgt: 'ACCEPT',label: 'Δ' },
-      { src: 'S17', tgt: 'S12',   label: 'a', curve: 1.4, sweep: 0 },
       { src: 'S17', tgt: 'S18',   label: 'b' },
-      { src: 'S17', tgt: 'rjS17', label: 'Δ' },
-      { src: 'S18', tgt: 'S12',   label: 'b,Δ' },
-      { src: 'S18', tgt: 'rjS18', label: 'Δ' },
+      { src: 'S17', tgt: 'rjS17', label: 'a,Δ' },
+      { src: 'S18', tgt: 'S13',   label: 'a' },
+      { src: 'S18', tgt: 'rjS18', label: 'b,Δ' },
     ]
   }
 }
@@ -438,52 +445,49 @@ const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
       <code class="regex-code">{{ REGEX_MAP[problemId] }}</code>
     </div>
 
-    <!-- Notation -->
-    <div class="notation-card">
-      <span class="note-text">Δ = blank / bottom-of-stack symbol &nbsp;|&nbsp; Diamond = READ node &nbsp;|&nbsp; Double-border oblong = accept</span>
-    </div>
 
     <!-- Simulation status (visible when a string is being traced) -->
-    <div v-if="animPath.length > 0" class="simulation-status-card">
+    <div v-if="animPath.length > 0" class="sim-panel" :class="animDone ? (animAccepted ? 'sim-ok' : 'sim-fail') : 'sim-running'">
 
-      <!-- Tape -->
-      <div v-if="tape.length > 0" class="tape-section">
-        <div class="section-label">Tape</div>
-        <div class="tape-container no-scrollbar-x">
-          <div v-for="(cell, i) in tape" :key="i" :class="['tape-cell', cell.status]">
-            {{ cell.ch }}
+      <!-- Left: state + reading -->
+      <div class="sim-left">
+        <div class="sim-state-wrap">
+          <span class="sim-micro-label">State</span>
+          <span :class="['sim-state', animDone ? (animAccepted ? 'ok' : 'fail') : 'running']">
+            {{ activeNodeId }}
+          </span>
+        </div>
+        <div class="sim-divider-v"></div>
+        <div class="sim-reading-wrap">
+          <span class="sim-micro-label">Reading</span>
+          <span v-if="animCurrentChar != null" class="sim-char">{{ animCurrentChar }}</span>
+          <span v-else-if="animIndex > 0" class="sim-char delta">Δ</span>
+          <span v-else class="sim-char muted">—</span>
+        </div>
+      </div>
+
+      <!-- Center: tape -->
+      <div class="sim-tape-wrap" v-if="tape.length > 0">
+        <div class="sim-tape no-scrollbar-x">
+          <div v-for="(cell, i) in tape" :key="i" :class="['sim-cell', cell.status]">
+            <span class="sim-cell-ch">{{ cell.ch }}</span>
+            <span v-if="cell.status === 'active'" class="sim-cell-head">▲</span>
           </div>
         </div>
       </div>
 
-      <!-- State + reading char + result -->
-      <div class="status-row">
-        <div class="current-state-box" v-if="activeNodeId">
-          <span class="s-label">Current State</span>
-          <div :class="['state-badge', animDone ? (animAccepted ? 'ok' : 'fail') : 'active']">
-            {{ activeNodeId }}
+      <!-- Right: result -->
+      <div class="sim-right">
+        <transition name="pop">
+          <div v-if="animDone" :class="['sim-result', animAccepted ? 'result-ok' : 'result-fail']">
+            <span class="result-icon">{{ animAccepted ? '✓' : '✕' }}</span>
+            <span class="result-text">{{ animAccepted ? 'Accepted' : 'Rejected' }}</span>
           </div>
-        </div>
-
-        <div class="read-char-box" v-if="animCurrentChar != null">
-          <span class="s-label">Reading</span>
-          <div class="char-badge">{{ animCurrentChar }}</div>
-        </div>
-
-        <div class="read-char-box" v-else-if="animIndex > 0">
-          <span class="s-label">Reading</span>
-          <div class="char-badge delta">Δ</div>
-        </div>
-
-        <div class="result-banner-box">
-          <transition name="pop">
-            <div v-if="animDone" :class="['banner', animAccepted ? 'banner-ok' : 'banner-fail']">
-              <span v-if="animAccepted">✓ String Accepted</span>
-              <span v-else-if="!props.testString">✕ Empty string rejected</span>
-              <span v-else>✕ String Rejected</span>
-            </div>
-          </transition>
-        </div>
+          <div v-else class="sim-result result-running">
+            <span class="result-icon spin">◌</span>
+            <span class="result-text">Tracing…</span>
+          </div>
+        </transition>
       </div>
 
     </div>
@@ -571,51 +575,220 @@ const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
 </template>
 
 <style scoped>
-.pda-wrap { display:flex; flex-direction:column; gap:0.75rem; max-width:1100px; margin:20px auto; padding:1.2rem; background:#ffffff; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); font-family:'Inter','Segoe UI',sans-serif; }
+.pda-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 1140px;
+  margin: 16px auto;
+  padding: 1.2rem;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  font-family: 'Inter','Segoe UI',sans-serif;
+  border: 1px solid #e8ecf0;
+}
 
-.pda-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+.pda-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f4f8;
+}
 .header-left { display:flex; align-items:center; gap:0.6rem; }
-.badge { background:#1e1e2e; color:#cdd6f4; font-size:11px; font-weight:600; letter-spacing:0.08em; padding:3px 8px; border-radius:5px; }
-.title { font-size:18px; font-weight:600; color:#1e1e2e; }
+.badge {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 9px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+.title { font-size:17px; font-weight:700; color:#0f172a; letter-spacing:-0.01em; }
 .header-right { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
-.leg { font-size:12px; color:#6b7280; }
+.leg { font-size:11.5px; color:#6b7280; font-weight:500; }
 
-.regex-wrap { display:flex; align-items:flex-start; gap:0.6rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.9rem; }
-.regex-label { font-size:11px; font-weight:600; color:#94a3b8; letter-spacing:0.06em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
-.regex-code { font-family:'Courier New',monospace; font-size:13px; color:#334155; word-break:break-all; line-height:1.6; }
+.regex-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-left: 3px solid #22c55e;
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+}
+.regex-label { font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
+.regex-code { font-family:'Courier New',monospace; font-size:12.5px; color:#1e40af; word-break:break-all; line-height:1.65; }
 
-.notation-card { display:flex; align-items:center; flex-wrap:wrap; gap:0.35rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.9rem; }
-.note-text { font-size:12px; color:#475569; }
+/* ── Simulation panel ───────────────────────────────────────── */
+.sim-panel {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-radius: 12px;
+  border: 1.5px solid #e8ecf0;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 68px;
+  transition: border-color 0.3s;
+}
+.sim-panel.sim-ok   { border-color: #86efac; }
+.sim-panel.sim-fail { border-color: #fca5a5; }
 
-/* Simulation status card */
-.simulation-status-card { border:1px solid #e2e8f0; border-radius:10px; background:#fff; padding:12px; display:flex; flex-direction:column; gap:12px; }
+/* Left: state + reading */
+.sim-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  background: #f8fafc;
+  border-right: 1.5px solid #e8ecf0;
+  height: 100%;
+  min-height: 68px;
+}
+.sim-state-wrap, .sim-reading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  gap: 4px;
+}
+.sim-micro-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+.sim-state {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.sim-state.running { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+.sim-state.ok      { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+.sim-state.fail    { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; }
 
-.section-label { font-size:11px; font-weight:600; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; }
-.s-label { font-size:10px; font-weight:600; color:#94a3b8; text-transform:uppercase; display:block; margin-bottom:2px; }
+.sim-char {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1.5px solid #fcd34d;
+  border-radius: 6px;
+  padding: 2px 10px;
+  min-width: 32px;
+  text-align: center;
+}
+.sim-char.delta { color: #7c3aed; background: #f5f3ff; border-color: #c4b5fd; }
+.sim-char.muted { color: #cbd5e1; background: #f8fafc; border-color: #e2e8f0; }
 
-.tape-container { display:flex; gap:4px; padding:4px 0; overflow-x:auto; }
-.tape-cell { min-width:30px; height:30px; display:flex; align-items:center; justify-content:center; border:1px solid #e2e8f0; border-radius:6px; font-family:monospace; font-weight:bold; font-size:14px; transition:all 0.2s; background:#f8fafc; }
-.tape-cell.done   { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
-.tape-cell.active { background:#fffbeb; color:#d97706; border-color:#fde68a; transform:translateY(-2px); box-shadow:0 4px 6px -1px rgba(0,0,0,0.1); }
+.sim-divider-v {
+  width: 1px;
+  align-self: stretch;
+  background: #e8ecf0;
+  margin: 10px 0;
+}
 
-.status-row { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+/* Center: tape */
+.sim-tape-wrap {
+  flex: 1;
+  min-width: 0;
+  padding: 0 14px;
+  overflow: hidden;
+}
+.sim-tape {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 10px 0 12px;
+  align-items: flex-end;
+}
+.sim-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.sim-cell-ch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 15px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+.sim-cell.done .sim-cell-ch   { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
+.sim-cell.active .sim-cell-ch { background: #fffbeb; color: #d97706; border-color: #fcd34d; box-shadow: 0 4px 12px rgba(217,119,6,0.22); transform: translateY(-3px); }
+.sim-cell-head {
+  font-size: 9px;
+  color: #f59e0b;
+  line-height: 1;
+  margin-top: 1px;
+}
 
-.state-badge { padding:4px 12px; border-radius:6px; font-weight:bold; font-size:13px; border:1px solid transparent; }
-.state-badge.active { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
-.state-badge.ok     { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
-.state-badge.fail   { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+/* Right: result */
+.sim-right {
+  flex-shrink: 0;
+  padding: 0 16px;
+  border-left: 1.5px solid #e8ecf0;
+  height: 100%;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+}
+.sim-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 72px;
+}
+.result-icon {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+}
+.result-text {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.result-ok   .result-icon { color: #16a34a; }
+.result-ok   .result-text { color: #16a34a; }
+.result-fail .result-icon { color: #dc2626; }
+.result-fail .result-text { color: #dc2626; }
+.result-running .result-icon { color: #94a3b8; }
+.result-running .result-text { color: #94a3b8; }
 
-.char-badge { padding:4px 10px; background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:6px; font-weight:bold; font-family:monospace; }
-.char-badge.delta { background:#f5f3ff; color:#7c3aed; border-color:#ddd6fe; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 1.2s linear infinite; }
 
-.result-banner-box { }
-.banner { padding:6px 14px; border-radius:6px; font-size:13px; font-weight:bold; }
-.banner-ok   { background:#16a34a; color:white; }
-.banner-fail { background:#dc2626; color:white; }
-
-.pda-viz-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
-.viz-head { padding:8px 16px; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; text-transform:uppercase; }
-.image-viewport { padding:20px; display:flex; justify-content:center; background:#fafafa; overflow-x:auto; }
+.pda-viz-card { border:1.5px solid #e8ecf0; border-radius:10px; overflow:hidden; background:#fff; }
+.viz-head { padding:9px 16px; background:#f8fafc; border-bottom:1.5px solid #e8ecf0; font-size:10.5px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; }
+.image-viewport { padding:20px; display:flex; justify-content:center; background:#fafbfc; overflow-x:auto; }
 
 .no-scrollbar-x { scrollbar-width:none; }
 .no-scrollbar-x::-webkit-scrollbar { display:none; }

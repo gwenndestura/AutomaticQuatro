@@ -185,84 +185,89 @@ onMounted(() => { if (props.testString.trim()) runSimulation(false) })
       <code class="regex-code">{{ problemRegex }}</code>
     </div>
 
-    <!-- Productions -->
-    <div class="rule-card">
-      <div class="rule-card-head">
-        <span>Production Rules</span>
-        <span class="rule-count">{{ cfg.productions.length }} rules</span>
-      </div>
-      <div class="rule-list">
-        <div
-          v-for="(prod, idx) in cfg.productions"
-          :key="idx"
-          class="rule-row"
-          :class="{ hovered: hoveredRow === idx }"
-          @mouseenter="hoveredRow = idx"
-          @mouseleave="hoveredRow = null"
-        >
-          <span class="lhs">{{ prod.lhs }}</span>
-          <span class="arrow">→</span>
-          <span class="rhs-group">
-            <template v-for="(alt, ai) in prod.alts" :key="ai">
-              <span v-if="ai > 0" class="pipe">|</span>
-              <span
-                v-for="(tok, ti) in tokenizeAlt(alt)"
-                :key="ti"
-                :class="['tok', tok.isNT ? 'nt' : 't']"
-              >{{ tok.ch }}</span>
-            </template>
-          </span>
-          <span class="rule-note">{{ prod.note }}</span>
+    <!-- Two-column body: rules left, simulation right -->
+    <div class="cfg-body">
+
+      <!-- Productions -->
+      <div class="rule-card">
+        <div class="rule-card-head">
+          <span>Production Rules</span>
+          <span class="rule-count">{{ cfg.productions.length }} rules</span>
+        </div>
+        <div class="rule-list">
+          <div
+            v-for="(prod, idx) in cfg.productions"
+            :key="idx"
+            class="rule-row"
+            :class="{ hovered: hoveredRow === idx }"
+            @mouseenter="hoveredRow = idx"
+            @mouseleave="hoveredRow = null"
+          >
+            <span class="lhs">{{ prod.lhs }}</span>
+            <span class="arrow">→</span>
+            <span class="rhs-group">
+              <template v-for="(alt, ai) in prod.alts" :key="ai">
+                <span v-if="ai > 0" class="pipe">|</span>
+                <span
+                  v-for="(tok, ti) in tokenizeAlt(alt)"
+                  :key="ti"
+                  :class="['tok', tok.isNT ? 'nt' : 't']"
+                >{{ tok.ch }}</span>
+              </template>
+            </span>
+            <span class="rule-note">{{ prod.note }}</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Simulation -->
-    <div class="sim-card" ref="simCardRef">
-      <div class="sim-head">String Simulation</div>
-      <div class="sim-body">
-        <!-- No result yet -->
-        <div v-if="!derivation && !simError" class="sim-hint">
-          Run a test string from the left panel to see the leftmost derivation here.
-        </div>
-
-        <!-- Error -->
-        <div v-if="simError" class="sim-error">{{ simError }}</div>
-
-        <!-- Derivation steps -->
-        <div v-if="derivation" class="deriv-box">
-          <div class="deriv-title">
-            Leftmost Derivation of
-            <code class="deriv-input-label">{{ testString.trim() }}</code>
-            <span class="deriv-steps-count">{{ derivation.length - 1 }} step{{ derivation.length !== 2 ? 's' : '' }}</span>
+      <!-- Simulation -->
+      <div class="sim-card" ref="simCardRef">
+        <div class="sim-head">String Simulation</div>
+        <div class="sim-body">
+          <!-- No result yet -->
+          <div v-if="!derivation && !simError" class="sim-hint">
+            Run a test string from the left panel to see the leftmost derivation here.
           </div>
 
-          <div class="deriv-lines">
-            <div
-              v-for="(step, si) in derivation.slice(1)"
-              :key="si"
-              class="deriv-line"
-            >
-              <span class="deriv-lhs">
-                <span
-                  v-if="si === 0"
-                  v-for="(tok, ti) in tokenizeStep(derivation[0])"
-                  :key="ti"
-                  :class="['dtok', tok.isNT ? 'dnt' : 'dt']"
-                >{{ tok.ch }}</span>
-              </span>
-              <span class="deriv-sep">→</span>
-              <span class="deriv-form">
-                <span
-                  v-for="(tok, ti) in tokenizeStep(step)"
-                  :key="ti"
-                  :class="['dtok', tok.isLambda ? 'dlambda' : tok.isNT ? 'dnt' : 'dt']"
-                >{{ tok.ch }}</span>
-              </span>
+          <!-- Error -->
+          <div v-if="simError" class="sim-error">{{ simError }}</div>
+
+          <!-- Derivation steps -->
+          <div v-if="derivation" class="deriv-box">
+            <div class="deriv-title">
+              Leftmost Derivation of
+              <code class="deriv-input-label">{{ testString.trim() }}</code>
+              <span class="deriv-steps-count">{{ derivation.length - 1 }} step{{ derivation.length !== 2 ? 's' : '' }}</span>
+            </div>
+
+            <div class="deriv-lines">
+              <div
+                v-for="(step, si) in derivation.slice(1)"
+                :key="si"
+                class="deriv-line"
+              >
+                <span class="deriv-lhs">
+                  <span
+                    v-if="si === 0"
+                    v-for="(tok, ti) in tokenizeStep(derivation[0])"
+                    :key="ti"
+                    :class="['dtok', tok.isNT ? 'dnt' : 'dt']"
+                  >{{ tok.ch }}</span>
+                </span>
+                <span class="deriv-sep">→</span>
+                <span class="deriv-form">
+                  <span
+                    v-for="(tok, ti) in tokenizeStep(step)"
+                    :key="ti"
+                    :class="['dtok', tok.isLambda ? 'dlambda' : tok.isNT ? 'dnt' : 'dt']"
+                  >{{ tok.ch }}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
 
   </div>
@@ -273,76 +278,95 @@ onMounted(() => { if (props.testString.trim()) runSimulation(false) })
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-width: 900px;
-  margin: 20px auto;
+  max-width: 920px;
+  margin: 16px auto;
   padding: 1.2rem;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
   font-family: 'Inter', 'Segoe UI', sans-serif;
+  border: 1px solid #e8ecf0;
 }
 
 /* Header */
-.cfg-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+.cfg-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; padding-bottom:10px; border-bottom:1px solid #f0f4f8; }
 .header-left { display:flex; align-items:center; gap:0.6rem; }
-.badge { background:#1e1e2e; color:#cdd6f4; font-size:11px; font-weight:600; letter-spacing:0.08em; padding:3px 8px; border-radius:5px; }
-.title { font-size:18px; font-weight:600; color:#1e1e2e; }
+.badge { background:linear-gradient(135deg,#1e293b,#0f172a); color:#cbd5e1; font-size:10px; font-weight:700; letter-spacing:0.1em; padding:3px 9px; border-radius:6px; text-transform:uppercase; }
+.title { font-size:17px; font-weight:700; color:#0f172a; letter-spacing:-0.01em; }
 .header-right { display:flex; align-items:center; gap:0.4rem; }
-.dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
 .nt-dot { background:#f59e0b; }
-.t-dot  { background:#10b981; margin-left:0.6rem; }
-.leg { font-size:12px; color:#6b7280; }
+.t-dot  { background:#10b981; margin-left:0.5rem; }
+.leg { font-size:11.5px; color:#6b7280; font-weight:500; }
 
 /* Regex */
-.regex-wrap { display:flex; align-items:flex-start; gap:0.6rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.9rem; }
-.regex-label { font-size:11px; font-weight:600; color:#94a3b8; letter-spacing:0.06em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
-.regex-code { font-family:'Courier New',monospace; font-size:13px; color:#334155; word-break:break-all; line-height:1.6; }
+.regex-wrap { display:flex; align-items:flex-start; gap:0.7rem; background:#f8fafc; border:1.5px solid #e2e8f0; border-left:3px solid #22c55e; border-radius:8px; padding:0.65rem 0.9rem; }
+.regex-label { font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:0.07em; text-transform:uppercase; padding-top:2px; white-space:nowrap; }
+.regex-code { font-family:'Courier New',monospace; font-size:12.5px; color:#1e40af; word-break:break-all; line-height:1.65; }
+
+/* Two-column layout */
+.cfg-body {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.rule-card {
+  flex: 0 0 auto;
+  width: 52%;
+}
+.sim-card {
+  flex: 1;
+  min-width: 0;
+}
 
 /* Rule card */
-.rule-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
-.rule-card-head { display:flex; align-items:center; justify-content:space-between; padding:0.55rem 1rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; letter-spacing:0.04em; text-transform:uppercase; }
-.rule-count { font-size:11px; font-weight:500; color:#94a3b8; background:#f1f5f9; padding:2px 8px; border-radius:20px; border:1px solid #e2e8f0; }
+.rule-card { border:1.5px solid #e8ecf0; border-radius:10px; overflow:hidden; background:#fff; }
+.rule-card-head { display:flex; align-items:center; justify-content:space-between; padding:0.6rem 1rem; background:#f8fafc; border-bottom:1.5px solid #e8ecf0; font-size:10.5px; font-weight:700; color:#64748b; letter-spacing:0.08em; text-transform:uppercase; }
+.rule-count { font-size:11px; font-weight:500; color:#94a3b8; background:#f1f5f9; padding:2px 10px; border-radius:20px; border:1px solid #e2e8f0; }
 .rule-list { display:flex; flex-direction:column; }
-.rule-row { display:flex; align-items:center; gap:0; padding:0.45rem 1rem; border-bottom:1px solid #f1f5f9; font-family:'Courier New',monospace; font-size:13.5px; transition:background 0.15s; cursor:default; }
+.rule-row { display:flex; align-items:center; gap:0; padding:0.5rem 1rem; border-bottom:1px solid #f1f5f9; font-family:'Courier New',monospace; font-size:13.5px; transition:background 0.15s; cursor:default; }
 .rule-row:last-child { border-bottom:none; }
-.rule-row.hovered { background:#fafafa; }
-.lhs { font-weight:700; color:#f59e0b; min-width:18px; }
-.rule-row.hovered .lhs { color:#d97706; }
+.rule-row.hovered { background:#fffbf0; }
+.lhs { font-weight:700; color:#d97706; min-width:18px; }
+.rule-row.hovered .lhs { color:#b45309; }
 .arrow { color:#cbd5e1; margin:0 0.65rem; font-size:15px; }
 .rhs-group { display:flex; flex-wrap:wrap; align-items:center; gap:1px; flex:1; }
 .pipe { color:#cbd5e1; margin:0 0.35rem; }
 .tok { font-family:'Courier New',monospace; font-size:13.5px; }
-.tok.nt { color:#f59e0b; }
-.tok.t  { color:#10b981; }
+.tok.nt { color:#d97706; }
+.tok.t  { color:#059669; }
 .rule-note { font-size:10.5px; color:#94a3b8; margin-left:auto; padding-left:12px; font-family:'Inter',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
 .rule-row.hovered .rule-note { color:#64748b; }
 
 /* Simulation card */
-.sim-card { border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; background:#fff; }
-.sim-head { padding:0.55rem 1rem; background:#f8fafc; border-bottom:1px solid #e2e8f0; font-size:12px; font-weight:600; color:#64748b; letter-spacing:0.04em; text-transform:uppercase; }
+.sim-card { border:1.5px solid #e8ecf0; border-radius:10px; overflow:hidden; background:#fff; }
+.sim-head { padding:0.6rem 1rem; background:#f8fafc; border-bottom:1.5px solid #e8ecf0; font-size:10.5px; font-weight:700; color:#64748b; letter-spacing:0.08em; text-transform:uppercase; }
 .sim-body { padding:1rem; display:flex; flex-direction:column; gap:0.75rem; }
 
 .sim-hint { font-size:12.5px; color:#94a3b8; font-style:italic; padding:4px 0; }
-
-.sim-error { font-size:12.5px; color:#ef4444; padding:6px 10px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px; }
+.sim-error { font-size:12.5px; color:#ef4444; padding:7px 11px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:7px; }
 
 /* Derivation display */
-.deriv-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; }
+.deriv-box { background:#f8fafc; border:1.5px solid #e8ecf0; border-radius:9px; overflow:hidden; }
 .deriv-title {
   display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  padding:8px 14px; border-bottom:1px solid #e2e8f0;
+  padding:9px 14px; border-bottom:1.5px solid #e8ecf0;
   font-size:11.5px; font-weight:600; color:#64748b;
 }
-.deriv-input-label { font-family:'Courier New',monospace; color:#0f172a; background:#e2e8f0; padding:1px 6px; border-radius:4px; }
+.deriv-input-label { font-family:'Courier New',monospace; color:#0f172a; background:#e2e8f0; padding:2px 7px; border-radius:5px; }
 .deriv-steps-count { margin-left:auto; font-size:10.5px; color:#94a3b8; font-weight:500; }
 
 .deriv-lines { padding:12px 14px; display:flex; flex-direction:column; gap:3px; max-height:440px; overflow-y:auto; }
-
 .deriv-line  { display:flex; align-items:baseline; gap:6px; font-family:'Courier New',monospace; font-size:13px; }
 .deriv-lhs   { min-width:1ch; flex-shrink:0; display:flex; }
 .deriv-sep   { color:#94a3b8; font-size:14px; flex-shrink:0; }
 .deriv-form  { display:flex; flex-wrap:wrap; gap:0; }
-.dtok.dnt    { color:#f59e0b; font-weight:700; }
-.dtok.dt     { color:#10b981; }
+.dtok.dnt    { color:#d97706; font-weight:700; }
+.dtok.dt     { color:#059669; }
 .dtok.dlambda{ color:#94a3b8; font-style:italic; }
+
+@media (max-width: 720px) {
+  .cfg-body { flex-direction: column; }
+  .rule-card { width: 100%; }
+}
 </style>

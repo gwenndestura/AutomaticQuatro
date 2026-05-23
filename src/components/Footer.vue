@@ -43,18 +43,8 @@ const developers = [
       <!-- Top row -->
       <div class="footer-top">
         <div class="footer-brand">
-          <svg width="22" height="22" viewBox="0 0 28 28" fill="none" style="flex-shrink:0">
-            <circle cx="14" cy="14" r="13" stroke="#4caf50" stroke-width="2"/>
-            <circle cx="14" cy="14" r="4" fill="#4caf50"/>
-            <line x1="14" y1="1" x2="14" y2="7"  stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="14" y1="21" x2="14" y2="27" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="1"  y1="14" x2="7"  y2="14" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="21" y1="14" x2="27" y2="14" stroke="#4caf50" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          <div>
-            <div class="brand-name">Automata Simulator</div>
-            <div class="brand-sub">Automata Theory &amp; Formal Languages · DLSUD</div>
-          </div>
+          <img src="../assets/aqlogo.png" alt="AutomaticQuatro" class="footer-logo" />
+          <div class="brand-sub">Automata Theory &amp; Formal Languages · DLSUD</div>
         </div>
 
         <div class="footer-note">
@@ -129,18 +119,17 @@ const developers = [
 }
 .footer-brand {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
 }
-.brand-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: #e6f4ea;
+.footer-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
 }
 .brand-sub {
   font-size: 11px;
   color: #3d6645;
-  margin-top: 2px;
   letter-spacing: 0.03em;
 }
 .footer-note {
