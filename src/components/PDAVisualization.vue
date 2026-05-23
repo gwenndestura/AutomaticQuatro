@@ -98,7 +98,6 @@ const PDA_CONFIGS = {
       { id: 'rjS2',  label: 'REJECT', type: 'reject', x:  400, y: 120 },
       { id: 'rjS3',  label: 'REJECT', type: 'reject', x:  540, y:  40 },
       { id: 'rjS4',  label: 'REJECT', type: 'reject', x:  540, y: 560 },
-      { id: 'rjS5',  label: 'REJECT', type: 'reject', x:  680, y: 120 },
       { id: 'rjS7a', label: 'REJECT', type: 'reject', x:  980, y:  40 },
       { id: 'rjS7b', label: 'REJECT', type: 'reject', x:  980, y: 560 },
       { id: 'rjS8',  label: 'REJECT', type: 'reject', x: 1200, y: 120 },
@@ -165,10 +164,10 @@ const PDA_CONFIGS = {
       { src: 'S4',  tgt: 'S5',    label: 'b' },
       { src: 'S4',  tgt: 'rjS4',  label: 'a,Δ' },
 
-      // S5 (a*b*): a→S5, b→S6, Δ→reject
+      // S5 (a*b*): a→S5, b→S6, Δ→S8 (epsilon — allow skipping b* entirely)
       { src: 'S5',  tgt: 'S5',    label: 'a' },
       { src: 'S5',  tgt: 'S6',    label: 'b' },
-      { src: 'S5',  tgt: 'rjS5',  label: 'Δ' },
+      { src: 'S5',  tgt: 'S8',    label: 'Δ', curve: 1.5, sweep: 1 },
 
       // S6 (a*+b* branch): a→S7a, b→S7b, Δ→S8
       { src: 'S6',  tgt: 'S7a',   label: 'a' },
@@ -227,9 +226,9 @@ const PDA_CONFIGS = {
       { src: 'S20', tgt: 'S21',   label: 'b' },
       { src: 'S20', tgt: 'rjS20', label: 'a,Δ' },
 
-      // S21 ((a+b)*): a,b→S30, Δ→reject
+      // S21 ((a+b)*): a,b→S30, Δ→S30 (epsilon — allow zero-length (a+b)*)
       { src: 'S21', tgt: 'S30',   label: 'a,b' },
-      { src: 'S21', tgt: 'rjS21', label: 'Δ' },
+      { src: 'S21', tgt: 'S30',   label: 'Δ' },
 
       // S30 (branch into bab/aba ninth block): b→S31, a→S34, Δ→reject
       { src: 'S30', tgt: 'S31',   label: 'b' },
@@ -382,27 +381,79 @@ const buildPath = (input) => {
     transMap[lnk.src].push({ ...lnk, idx })
   })
 
+  const isRej = (id) => id.startsWith('rj') || nodeMap.value[id]?.type === 'reject'
+
+  // ── NFA DFS: find an accepting path ─────────────────────────────────────
+  const memo  = new Map()
+  const stack = new Set()
+
+  const findAccept = (node, pos) => {
+    if (node === 'ACCEPT') return pos === input.length ? [] : null
+    if (isRej(node)) return null
+
+    const key = `${node}:${pos}`
+    if (memo.has(key))  return memo.get(key)
+    if (stack.has(key)) return null
+    stack.add(key)
+
+    const char  = pos < input.length ? input[pos] : null
+    const avail = (transMap[node] || []).filter(t => !isRej(t.tgt))
+    let result  = null
+
+    for (const t of avail) {
+      if (result) break
+      const parts   = t.label.split(',').map(s => s.trim())
+      const charHit = char !== null && parts.includes(char)
+      const epsHit  = parts.includes('Δ') || parts.includes('')
+
+      if (charHit) {
+        const sub = findAccept(t.tgt, pos + 1)
+        if (sub !== null) result = [{ tIdx: t.idx, consume: true }, ...sub]
+      }
+      if (!result && epsHit) {
+        const sub = findAccept(t.tgt, pos)
+        if (sub !== null) result = [{ tIdx: t.idx, consume: false }, ...sub]
+      }
+    }
+
+    stack.delete(key)
+    memo.set(key, result)
+    return result
+  }
+
+  const decisions = findAccept('START', 0)
+
+  if (decisions !== null) {
+    const path = []
+    let node = 'START', pos = 0
+    path.push({ nodeId: node, linkIdx: -1, charIdx: pos, char: input[pos] ?? 'Δ' })
+    for (const dec of decisions) {
+      path[path.length - 1] = { ...path[path.length - 1], linkIdx: dec.tIdx }
+      node = pda.value.links[dec.tIdx].tgt
+      if (dec.consume) pos++
+      path.push({ nodeId: node, linkIdx: -1, charIdx: pos, char: pos < input.length ? input[pos] : 'Δ' })
+    }
+    return path
+  }
+
+  // ── Fallback: deterministic rejection path for animation ─────────────────
   const path = []
-  let node = 'START'
-  let pos  = 0
+  let node = 'START', pos = 0
   const max = (input.length + 1) * 10 + 40
 
   for (let step = 0; step < max; step++) {
     const char = pos < input.length ? input[pos] : null
     path.push({ nodeId: node, linkIdx: -1, charIdx: pos, char: char ?? 'Δ' })
-
-    if (node === 'ACCEPT' || node.startsWith('rj')) break
+    if (node === 'ACCEPT' || isRej(node)) break
 
     const avail = transMap[node] || []
     let matched = null
 
-    // priority 1 — match current character
     if (char !== null) {
       for (const t of avail) {
         if (t.label.split(',').map(s => s.trim()).includes(char)) { matched = t; break }
       }
     }
-    // priority 2 — epsilon / Δ transition
     if (!matched) {
       for (const t of avail) {
         const parts = t.label.split(',').map(s => s.trim())
@@ -411,11 +462,8 @@ const buildPath = (input) => {
     }
 
     if (!matched) break
-    path[path.length - 1].linkIdx = matched.idx
-
-    // advance position only when a real character was consumed
+    path[path.length - 1] = { ...path[path.length - 1], linkIdx: matched.idx }
     if (char !== null && matched.label.split(',').map(s => s.trim()).includes(char)) pos++
-
     node = matched.tgt
   }
   return path
