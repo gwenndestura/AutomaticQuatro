@@ -500,8 +500,10 @@ onUnmounted(() => {
     <!-- Header -->
     <div class="dfa-header">
       <div class="header-left">
-        <span class="badge">DFA</span>
-        <span class="title">Problem {{ problemId }}</span>
+        <div class="header-tag">
+          <span class="tag-type">DFA</span>
+          <span class="tag-prob">Problem {{ problemId }}</span>
+        </div>
       </div>
       <div class="header-right">
         <span class="dot start-dot"></span><span class="leg">Start</span>
@@ -611,25 +613,35 @@ onUnmounted(() => {
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f4f8;
 }
-.header-left {
+.header-left { display:flex; align-items:center; }
+.header-tag {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 9px;
+    overflow: hidden;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.tag-type {
+    background: #16a34a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 7px 13px;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
 }
-.badge {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    color: #cbd5e1;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 3px 9px;
-    border-radius: 6px;
-    text-transform: uppercase;
-}
-.title {
-    font-size: 17px;
-    font-weight: 700;
+.tag-prob {
+    background: #f8fafc;
     color: #0f172a;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 7px 15px;
+    display: flex;
+    align-items: center;
+    border-left: 1.5px solid #e2e8f0;
     letter-spacing: -0.01em;
 }
 .header-right {
