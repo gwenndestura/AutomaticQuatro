@@ -90,110 +90,171 @@ const PDA_CONFIGS = {
   // ── Problem 1  (S states, a/b alphabet) ─────────────────────────────────
   1: {
     nodes: [
-      { id: 'START',  label: 'START',  type: 'start',  x:  130, y:  80 },
-      { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 2440, y: 340 },
-      { id: 'rjS1',  label: 'REJECT', type: 'reject', x:   30, y: 160 },
-      { id: 'rjS2',  label: 'REJECT', type: 'reject', x:  310, y:  40 },
-      { id: 'rjS3',  label: 'REJECT', type: 'reject', x:  460, y:  40 },
-      { id: 'rjS4',  label: 'REJECT', type: 'reject', x:  310, y: 300 },
-      { id: 'rjS5',  label: 'REJECT', type: 'reject', x:  460, y: 400 },
-      { id: 'rjS6',  label: 'REJECT', type: 'reject', x:  560, y: 400 },
-      { id: 'rjS7',  label: 'REJECT', type: 'reject', x:  720, y: 400 },
-      { id: 'rjS8',  label: 'REJECT', type: 'reject', x:  920, y:  80 },
-      { id: 'rjS9',  label: 'REJECT', type: 'reject', x: 1100, y:  80 },
-      { id: 'rjS11', label: 'REJECT', type: 'reject', x:  820, y: 260 },
-      { id: 'rjS12', label: 'REJECT', type: 'reject', x: 1020, y: 440 },
-      { id: 'rjS13', label: 'REJECT', type: 'reject', x: 1280, y: 440 },
-      { id: 'rjS14', label: 'REJECT', type: 'reject', x: 1460, y: 600 },
-      { id: 'rjS15', label: 'REJECT', type: 'reject', x: 1740, y:  80 },
-      { id: 'rjS17', label: 'REJECT', type: 'reject', x: 1100, y: 660 },
-      { id: 'rjS21', label: 'REJECT', type: 'reject', x: 1960, y:  80 },
-      { id: 'rjS18', label: 'REJECT', type: 'reject', x: 1280, y: 660 },
-      { id: 'rjS22', label: 'REJECT', type: 'reject', x: 2040, y: 200 },
-      { id: 'rjS23', label: 'REJECT', type: 'reject', x: 2240, y: 200 },
-      { id: 'S1',  label: 'S1',  type: 'state', x:  130, y: 160 },
-      { id: 'S2',  label: 'S2',  type: 'state', x:  310, y: 160 },
-      { id: 'S3',  label: 'S3',  type: 'state', x:  460, y: 160 },
-      { id: 'S4',  label: 'S4',  type: 'state', x:  310, y: 240 },
-      { id: 'S5',  label: 'S5',  type: 'state', x:  460, y: 240 },
-      { id: 'S6',  label: 'S6',  type: 'state', x:  560, y: 240 },
-      { id: 'S7',  label: 'S7',  type: 'state', x:  720, y: 240 },
-      { id: 'S8',  label: 'S8',  type: 'state', x:  920, y: 160 },
-      { id: 'S9',  label: 'S9',  type: 'state', x: 1100, y: 160 },
-      { id: 'S11', label: 'S11', type: 'state', x:  920, y: 340 },
-      { id: 'S12', label: 'S12', type: 'state', x: 1100, y: 340 },
-      { id: 'S13', label: 'S13', type: 'state', x: 1280, y: 340 },
-      { id: 'S14', label: 'S14', type: 'state', x: 1460, y: 500 },
-      { id: 'S15', label: 'S15', type: 'state', x: 1640, y: 500 },
-      { id: 'S17', label: 'S17', type: 'state', x: 1100, y: 520 },
-      { id: 'S18', label: 'S18', type: 'state', x: 1280, y: 520 },
-      { id: 'S20', label: 'S20', type: 'state', x: 1640, y: 340 },
-      { id: 'S21', label: 'S21', type: 'state', x: 1840, y: 160 },
-      { id: 'S22A',label: 'S22A',type: 'state', x: 1840, y: 340 },
-      { id: 'S22B',label: 'S22B',type: 'state', x: 1840, y: 460 },
-      { id: 'S23A',label: 'S23A',type: 'state', x: 2040, y: 340 },
-      { id: 'S23B',label: 'S23B',type: 'state', x: 2040, y: 460 },
-      { id: 'S30', label: 'S30', type: 'state', x: 2240, y: 340 },
+      { id: 'START',  label: 'START',  type: 'start',  x:  100, y: 300 },
+      { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 3020, y: 300 },
+
+      // Reject nodes
+      { id: 'rjS1',  label: 'REJECT', type: 'reject', x:  240, y: 120 },
+      { id: 'rjS2',  label: 'REJECT', type: 'reject', x:  400, y: 120 },
+      { id: 'rjS3',  label: 'REJECT', type: 'reject', x:  540, y:  40 },
+      { id: 'rjS4',  label: 'REJECT', type: 'reject', x:  540, y: 560 },
+      { id: 'rjS5',  label: 'REJECT', type: 'reject', x:  680, y: 120 },
+      { id: 'rjS7a', label: 'REJECT', type: 'reject', x:  980, y:  40 },
+      { id: 'rjS7b', label: 'REJECT', type: 'reject', x:  980, y: 560 },
+      { id: 'rjS8',  label: 'REJECT', type: 'reject', x: 1200, y: 120 },
+      { id: 'rjS9',  label: 'REJECT', type: 'reject', x: 1120, y:  40 },
+      { id: 'rjS11', label: 'REJECT', type: 'reject', x: 1360, y: 120 },
+      { id: 'rjS12', label: 'REJECT', type: 'reject', x: 1500, y: 120 },
+      { id: 'rjS13', label: 'REJECT', type: 'reject', x: 1660, y: 120 },
+      { id: 'rjS14', label: 'REJECT', type: 'reject', x: 1800, y:  40 },
+      { id: 'rjS15', label: 'REJECT', type: 'reject', x: 1940, y:  40 },
+      { id: 'rjS17', label: 'REJECT', type: 'reject', x: 1800, y: 560 },
+      { id: 'rjS18', label: 'REJECT', type: 'reject', x: 1940, y: 560 },
+      { id: 'rjS20', label: 'REJECT', type: 'reject', x: 2100, y: 120 },
+      { id: 'rjS21', label: 'REJECT', type: 'reject', x: 2260, y: 120 },
+      { id: 'rjS30', label: 'REJECT', type: 'reject', x: 2420, y: 120 },
+      { id: 'rjS31', label: 'REJECT', type: 'reject', x: 2560, y:  40 },
+      { id: 'rjS32', label: 'REJECT', type: 'reject', x: 2700, y:  40 },
+      { id: 'rjS34', label: 'REJECT', type: 'reject', x: 2560, y: 560 },
+      { id: 'rjS35', label: 'REJECT', type: 'reject', x: 2700, y: 560 },
+
+      // State nodes
+      { id: 'S1',  label: 'S1',  type: 'state', x:  240, y: 300 },
+      { id: 'S2',  label: 'S2',  type: 'state', x:  400, y: 300 },
+      { id: 'S3',  label: 'S3',  type: 'state', x:  540, y: 160 },
+      { id: 'S4',  label: 'S4',  type: 'state', x:  540, y: 440 },
+      { id: 'S5',  label: 'S5',  type: 'state', x:  680, y: 300 },
+      { id: 'S6',  label: 'S6',  type: 'state', x:  840, y: 300 },
+      { id: 'S7a', label: 'S7a', type: 'state', x:  980, y: 160 },
+      { id: 'S7b', label: 'S7b', type: 'state', x:  980, y: 440 },
+      { id: 'S8',  label: 'S8',  type: 'state', x: 1200, y: 300 },
+      { id: 'S9',  label: 'S9',  type: 'state', x: 1120, y: 160 },
+      { id: 'S11', label: 'S11', type: 'state', x: 1360, y: 300 },
+      { id: 'S12', label: 'S12', type: 'state', x: 1500, y: 300 },
+      { id: 'S13', label: 'S13', type: 'state', x: 1660, y: 300 },
+      { id: 'S14', label: 'S14', type: 'state', x: 1800, y: 160 },
+      { id: 'S15', label: 'S15', type: 'state', x: 1940, y: 160 },
+      { id: 'S17', label: 'S17', type: 'state', x: 1800, y: 440 },
+      { id: 'S18', label: 'S18', type: 'state', x: 1940, y: 440 },
+      { id: 'S20', label: 'S20', type: 'state', x: 2100, y: 300 },
+      { id: 'S21', label: 'S21', type: 'state', x: 2260, y: 300 },
+      { id: 'S30', label: 'S30', type: 'state', x: 2420, y: 300 },
+      { id: 'S31', label: 'S31', type: 'state', x: 2560, y: 160 },
+      { id: 'S32', label: 'S32', type: 'state', x: 2700, y: 160 },
+      { id: 'S34', label: 'S34', type: 'state', x: 2560, y: 440 },
+      { id: 'S35', label: 'S35', type: 'state', x: 2700, y: 440 },
+      { id: 'S33', label: 'S33', type: 'state', x: 2860, y: 300 },
     ],
     links: [
-      { src: 'START', tgt: 'S1',   label: '' },
-      { src: 'S1',  tgt: 'rjS1',  label: 'a,Δ' },
+      { src: 'START', tgt: 'S1',    label: '' },
+
+      // S1: b→S2, a/Δ→reject
       { src: 'S1',  tgt: 'S2',    label: 'b' },
-      { src: 'S2',  tgt: 'rjS2',  label: 'Δ' },
+      { src: 'S1',  tgt: 'rjS1',  label: 'a,Δ' },
+
+      // S2: a→S3, b→S4, Δ→reject
       { src: 'S2',  tgt: 'S3',    label: 'a' },
       { src: 'S2',  tgt: 'S4',    label: 'b' },
+      { src: 'S2',  tgt: 'rjS2',  label: 'Δ' },
+
+      // S3 (bab): b→S5, a/Δ→reject
+      { src: 'S3',  tgt: 'S5',    label: 'b' },
       { src: 'S3',  tgt: 'rjS3',  label: 'a,Δ' },
-      { src: 'S3',  tgt: 'S5',    label: 'b', curve: 1.5, sweep: 1 },
-      { src: 'S4',  tgt: 'rjS4',  label: 'a,Δ' },
+
+      // S4 (bbb): b→S5, a/Δ→reject
       { src: 'S4',  tgt: 'S5',    label: 'b' },
+      { src: 'S4',  tgt: 'rjS4',  label: 'a,Δ' },
+
+      // S5 (a*b*): a→S5, b→S6, Δ→reject
       { src: 'S5',  tgt: 'S5',    label: 'a' },
-      { src: 'S5',  tgt: 'S6',    label: 'b', curve: 10001 },
+      { src: 'S5',  tgt: 'S6',    label: 'b' },
       { src: 'S5',  tgt: 'rjS5',  label: 'Δ' },
-      { src: 'S6',  tgt: 'rjS6',  label: 'Δ' },
-      { src: 'S6',  tgt: 'S6',    label: 'b' },
-      { src: 'S6',  tgt: 'S7',    label: 'a' },
-      { src: 'S7',  tgt: 'rjS7',  label: 'Δ' },
-      { src: 'S7',  tgt: 'S8',    label: 'b' },
-      { src: 'S8',  tgt: 'rjS8',  label: 'Δ' },
+
+      // S6 (a*+b* branch): a→S7a, b→S7b, Δ→S8
+      { src: 'S6',  tgt: 'S7a',   label: 'a' },
+      { src: 'S6',  tgt: 'S7b',   label: 'b' },
+      { src: 'S6',  tgt: 'S8',    label: 'Δ', curve: 1.5, sweep: 0 },
+
+      // S7a (a* branch): a→S7a, Δ→S8, b→reject
+      { src: 'S7a', tgt: 'S7a',   label: 'a' },
+      { src: 'S7a', tgt: 'S8',    label: 'Δ' },
+      { src: 'S7a', tgt: 'rjS7a', label: 'b' },
+
+      // S7b (b* branch): b→S7b, Δ→S8, a→reject
+      { src: 'S7b', tgt: 'S7b',   label: 'b' },
+      { src: 'S7b', tgt: 'S8',    label: 'Δ' },
+      { src: 'S7b', tgt: 'rjS7b', label: 'a' },
+
+      // S8 ((ba)*): b→S9, a→S11, Δ→reject
       { src: 'S8',  tgt: 'S9',    label: 'b' },
       { src: 'S8',  tgt: 'S11',   label: 'a' },
+      { src: 'S8',  tgt: 'rjS8',  label: 'Δ' },
+
+      // S9 (ba loop): a→S8, b/Δ→reject
+      { src: 'S9',  tgt: 'S8',    label: 'a' },
       { src: 'S9',  tgt: 'rjS9',  label: 'b,Δ' },
-      { src: 'S9',  tgt: 'S8',    label: 'a', sweep: 1 },
+
+      // S11 (aba first a): b→S12, a/Δ→reject
       { src: 'S11', tgt: 'S12',   label: 'b' },
       { src: 'S11', tgt: 'rjS11', label: 'a,Δ' },
-      { src: 'S12', tgt: 'rjS12', label: 'b,Δ' },
+
+      // S12 (aba middle b): a→S13, b/Δ→reject
       { src: 'S12', tgt: 'S13',   label: 'a' },
+      { src: 'S12', tgt: 'rjS12', label: 'b,Δ' },
+
+      // S13 hub (updated): b→S20 (exit to bb), a→S17 (aba loop), Δ→reject
+      { src: 'S13', tgt: 'S20',   label: 'b', curve: 10001 },
+      { src: 'S13', tgt: 'S17',   label: 'a' },
       { src: 'S13', tgt: 'rjS13', label: 'Δ' },
-      { src: 'S13', tgt: 'S14',   label: 'b' },
-      { src: 'S13', tgt: 'S17',   label: 'a', curve: 1.4, sweep: 0 },
-      { src: 'S14', tgt: 'rjS14', label: 'Δ' },
+
+      // S14 (bab loop middle): a→S15, b/Δ→reject
       { src: 'S14', tgt: 'S15',   label: 'a' },
-      { src: 'S14', tgt: 'S20',   label: 'b' },
-      { src: 'S15', tgt: 'S13',   label: 'b' },
-      { src: 'S15', tgt: 'rjS14', label: 'a,Δ' },
-      { src: 'S20', tgt: 'S21',   label: 'b' },
-      { src: 'S20', tgt: 'rjS15', label: 'a,Δ' },
-      { src: 'S21', tgt: 'S22A',  label: 'a' },
-      { src: 'S21', tgt: 'S22B',  label: 'b', curve: 1.4, sweep: 1 },
-      { src: 'S21', tgt: 'rjS21', label: 'Δ' },
-      { src: 'S22A',tgt: 'rjS22', label: 'Δ' },
-      { src: 'S22A',tgt: 'S22A',  label: 'a' },
-      { src: 'S22A',tgt: 'S23A',  label: 'b', curve: 10001 },
-      { src: 'S22B',tgt: 'S23B',  label: 'a' },
-      { src: 'S22B',tgt: 'S22B',  label: 'b' },
-      { src: 'S22B',tgt: 'rjS22', label: 'Δ', curve: 1.4, sweep: 0 },
-      { src: 'S23A',tgt: 'rjS23', label: 'Δ' },
-      { src: 'S23A',tgt: 'S30',   label: 'a', curve: 10001 },
-      { src: 'S23A',tgt: 'S22A',  label: 'b' },
-      { src: 'S23B',tgt: 'S30',   label: 'b' },
-      { src: 'S23B',tgt: 'S22A',  label: 'a', curve: 1.5, sweep: 1 },
-      { src: 'S23B',tgt: 'rjS23', label: 'Δ' },
-      { src: 'S30', tgt: 'S30',   label: 'a,b' },
-      { src: 'S30', tgt: 'ACCEPT',label: 'Δ' },
+      { src: 'S14', tgt: 'rjS14', label: 'b,Δ' },
+
+      // S15 (bab loop end): b→S13, a/Δ→reject
+      { src: 'S15', tgt: 'S13',   label: 'b', curve: 1.5, sweep: 1 },
+      { src: 'S15', tgt: 'rjS15', label: 'a,Δ' },
+
+      // S17 (aba loop first b): b→S18, a/Δ→reject
       { src: 'S17', tgt: 'S18',   label: 'b' },
       { src: 'S17', tgt: 'rjS17', label: 'a,Δ' },
-      { src: 'S18', tgt: 'S13',   label: 'a' },
+
+      // S18 (aba loop end a): a→S13, b/Δ→reject
+      { src: 'S18', tgt: 'S13',   label: 'a', curve: 1.5, sweep: 0 },
       { src: 'S18', tgt: 'rjS18', label: 'b,Δ' },
+
+      // S20 (bb first b): b→S21, a/Δ→reject
+      { src: 'S20', tgt: 'S21',   label: 'b' },
+      { src: 'S20', tgt: 'rjS20', label: 'a,Δ' },
+
+      // S21 ((a+b)*): a,b→S30, Δ→reject
+      { src: 'S21', tgt: 'S30',   label: 'a,b' },
+      { src: 'S21', tgt: 'rjS21', label: 'Δ' },
+
+      // S30 (branch into bab/aba ninth block): b→S31, a→S34, Δ→reject
+      { src: 'S30', tgt: 'S31',   label: 'b' },
+      { src: 'S30', tgt: 'S34',   label: 'a' },
+      { src: 'S30', tgt: 'rjS30', label: 'Δ' },
+
+      // S31 (ninth bab: middle): a→S32, b/Δ→reject
+      { src: 'S31', tgt: 'S32',   label: 'a' },
+      { src: 'S31', tgt: 'rjS31', label: 'b,Δ' },
+
+      // S32 (ninth bab: end): b→S33, a/Δ→reject
+      { src: 'S32', tgt: 'S33',   label: 'b' },
+      { src: 'S32', tgt: 'rjS32', label: 'a,Δ' },
+
+      // S34 (ninth aba: first b): b→S35, a/Δ→reject
+      { src: 'S34', tgt: 'S35',   label: 'b' },
+      { src: 'S34', tgt: 'rjS34', label: 'a,Δ' },
+
+      // S35 (ninth aba: end a): a→S33, b/Δ→reject
+      { src: 'S35', tgt: 'S33',   label: 'a' },
+      { src: 'S35', tgt: 'rjS35', label: 'b,Δ' },
+
+      // S33 (final (a+b)*): a,b→S33, Δ→ACCEPT
+      { src: 'S33', tgt: 'S33',   label: 'a,b' },
+      { src: 'S33', tgt: 'ACCEPT', label: 'Δ' },
     ]
   }
 }
