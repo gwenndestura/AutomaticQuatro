@@ -3,7 +3,7 @@ const sections = [
   {
     id: 'introduction',
     title: 'Introduction',
-    content: `The Automata Simulator is an educational tool designed to bridge the gap between theoretical computation and visual representation. It allows users to input regular expressions and observe how they translate into mathematical models — including Deterministic Finite Automata (DFA), Context-Free Grammars (CFG), and Pushdown Automata (PDA).`
+    content: `AutomaticQuatro is an interactive, browser-based educational tool built for S-CSPC327 Theory of Automata and Formal Languages at De La Salle University – Dasmariñas. It lets you test strings against two pre-defined regular expressions and instantly see how each string is processed by three different formal models — a Deterministic Finite Automaton (DFA), a Context-Free Grammar (CFG), and a Pushdown Automaton (PDA). Each model is animated step-by-step so you can follow exactly which state is active, which character is being read, and whether the string is ultimately accepted or rejected.`
   },
   {
     id: 'getting-started',
@@ -11,15 +11,16 @@ const sections = [
     subsections: [
       {
         title: 'System Requirements',
-        body: 'The simulator runs on any modern browser (Chrome, Firefox, or Edge). It is optimized for desktop use to provide the best experience for complex automata visualizations.'
+        body: 'AutomaticQuatro runs entirely in the browser — no installation needed. Use a modern desktop browser (Chrome 100+, Firefox 100+, or Edge 100+) for the best experience. The complex automata diagrams are optimized for larger screens; a minimum width of 900 px is recommended.'
       },
       {
         title: 'Basic Workflow',
         items: [
-          { label: 'Select a Problem', text: 'Choose between Problem 1 or Problem 2 from the left sidebar. Each problem defines a distinct regular expression.' },
-          { label: 'Review the Regex', text: 'The selected regular expression is displayed below the problem tabs for reference.' },
-          { label: 'Enter a Test String', text: 'Type a string into one of the five input fields. A colored indicator shows whether the string is valid or invalid for the regex.' },
-          { label: 'Run the Simulation', text: 'Click Run to animate the automata. The visualization panel on the right will show the step-by-step state transitions.' },
+          { label: '1 — Select a Problem', text: 'Pick Problem 1 or Problem 2 from the left sidebar. Each problem is tied to a specific regular expression shown in the Regex block below the selector.' },
+          { label: '2 — Choose an Automaton tab', text: 'Click DFA, CFG, or PDA in the top tab bar of the right panel to select the model you want to visualize.' },
+          { label: '3 — Enter a test string', text: 'Type a string in the input field. The character preview below the field shows each character individually. You can also click a suggestion chip to auto-fill and run a known example string.' },
+          { label: '4 — Run the simulation', text: 'Press Enter or click Run. The selected automaton animates the trace step by step — highlighting the active state and the character being consumed at each transition.' },
+          { label: '5 — Review the result', text: 'A green Accepted or red Rejected badge appears when the trace finishes. Previously run strings are saved in the Recent history list for quick re-simulation.' },
         ]
       }
     ]
@@ -29,28 +30,42 @@ const sections = [
     title: 'Core Features',
     subsections: [
       {
-        title: 'Deterministic Finite Automata (DFA)',
-        body: 'The DFA module converts the selected regular expression into a state-transition diagram.',
+        title: 'Smart Input Panel',
+        body: 'The left sidebar input area is designed for fast experimentation.',
         items: [
-          { label: 'States', text: 'Represented by circles. The start state (blue), non-final states (yellow), accepting states (green), and trap/dead states (red) are visually distinguished.' },
-          { label: 'Transitions', text: 'Labeled arrows indicate movement between states based on input symbols.' },
-          { label: 'Interactive Playback', text: 'Click Run on any test string to animate the DFA step by step. The current state and the character being read are highlighted in real time.' },
+          { label: 'Single-input field', text: 'Enter any string and press Enter or click Run. No need to manage multiple rows.' },
+          { label: 'Character preview', text: 'As you type, each character is shown as an individual chip so you can spot typos before running.' },
+          { label: 'Suggestion chips', text: 'Clickable example strings are shown for each problem. Clicking a chip auto-fills the input and immediately starts the simulation.' },
+          { label: 'Recent history', text: 'The last 10 strings you simulated are listed below the input. Click the play button on any history entry to re-run it instantly.' },
+        ]
+      },
+      {
+        title: 'Deterministic Finite Automaton (DFA)',
+        body: 'The DFA tab renders the full state-transition graph for the selected problem and animates a trace when a string is submitted.',
+        items: [
+          { label: 'State colors', text: 'Start state — blue circle; non-final states — amber; accepting state — green; trap/dead states — red.' },
+          { label: 'Transition arrows', text: 'Labeled directed edges show which input symbol causes each state change. Self-loops and curved back-edges are drawn to avoid overlap.' },
+          { label: 'Step-by-step animation', text: 'The active state is highlighted with a glow, the tape shows each character being consumed, and the current state label updates live.' },
+          { label: 'Zoom and pan', text: 'Scroll the mouse wheel to zoom in or out. Click and drag to pan. Use the + / − / ⊙ buttons in the top-right corner of the diagram for keyboard-friendly zoom control.' },
         ]
       },
       {
         title: 'Context-Free Grammar (CFG)',
-        body: 'This module displays the formal production rules corresponding to the selected regular expression.',
+        body: 'The CFG tab displays the complete set of production rules derived from the regular expression.',
         items: [
-          { label: 'Production Rules', text: 'Each rule is listed with its left-hand side non-terminal, the derivation arrow, and the right-hand alternatives.' },
-          { label: 'Color Coding', text: 'Non-terminals are shown in amber; terminals are shown in green for quick visual scanning.' },
+          { label: 'Production rules', text: 'Each rule shows its left-hand non-terminal, the → arrow, and all right-hand alternatives separated by |.' },
+          { label: 'Color coding', text: 'Non-terminal symbols appear in amber; terminal symbols appear in green for immediate visual distinction.' },
+          { label: 'String validation', text: 'Submit a string to see a pass/fail result checked against the grammar.' },
         ]
       },
       {
-        title: 'Pushdown Automata (PDA)',
-        body: 'The PDA module models the same language using a stack-based automaton.',
+        title: 'Pushdown Automaton (PDA)',
+        body: 'The PDA tab shows a full NFA-style pushdown automaton diagram with animated tracing.',
         items: [
-          { label: 'State Shapes', text: 'States are drawn as oblongs. Accepting states are marked with a double border.' },
-          { label: 'Transition Labels', text: 'Each arrow is labeled in the format: input, pop → push. The symbol Δ denotes the blank stack symbol.' },
+          { label: 'Node shapes', text: 'READ states are drawn as yellow diamonds; START and ACCEPT use rounded blue/green rectangles; REJECT states use red rounded rectangles.' },
+          { label: 'Epsilon (Δ) transitions', text: 'Arrows labeled Δ fire without consuming any input character, enabling the NFA to explore multiple paths through the diagram.' },
+          { label: 'NFA simulation', text: 'The simulator uses a depth-first search over all non-rejecting paths to find an accepting trace, so valid strings are never incorrectly rejected due to a greedy choice.' },
+          { label: 'Zoom and pan', text: 'The PDA diagram is large — use the scroll wheel to zoom and drag to pan, or use the + / − / ⊙ buttons above the diagram.' },
         ]
       }
     ]
@@ -59,9 +74,12 @@ const sections = [
     id: 'faq',
     title: 'Troubleshooting',
     items: [
-      { label: 'String rejected unexpectedly', text: 'Verify the string against the regex shown in the sidebar. Trace the DFA diagram to identify which state causes rejection.' },
-      { label: 'Visualization not appearing', text: 'Ensure you have clicked Run. If the DFA tab is active, the animation starts automatically on Run.' },
-      { label: 'Slow rendering', text: 'For complex strings, the DFA animation may take a moment. Ensure your browser is up to date.' },
+      { label: 'String is rejected but I think it should be accepted', text: 'Double-check the string character-by-character using the character preview chips. Then compare against the regex shown in the sidebar. Use the DFA trace to see exactly which state causes rejection.' },
+      { label: 'Simulation does not start', text: 'Make sure you pressed Enter or clicked the Run button after typing the string. Clicking a suggestion chip runs automatically.' },
+      { label: 'Diagram is off-screen or hard to read', text: 'Use the + / − zoom buttons or scroll the mouse wheel over the diagram. Click and drag to reposition. Press ⊙ to reset the view.' },
+      { label: 'CFG shows no rules', text: 'The CFG panel requires a problem to be selected. If the regex field is empty, go back to the Simulations view and choose a problem first.' },
+      { label: 'Animation is very slow', text: 'For long strings, each step adds a small delay. Wait for the animation to complete or refresh the page and try a shorter string.' },
+      { label: 'Logo or images are not loading', text: 'Try a hard refresh (Ctrl + Shift + R on Windows, Cmd + Shift + R on Mac) to clear the browser cache.' },
     ]
   }
 ]

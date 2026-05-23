@@ -32,7 +32,7 @@ const PDA_CONFIGS = {
       { id: 'rj7',  label: 'REJECT', type: 'reject', x: 620,  y: 360 },
       { id: 'rj8',  label: 'REJECT', type: 'reject', x: 280,  y: 580 },
       { id: 'rj9',  label: 'REJECT', type: 'reject', x: 780,  y: 360 },
-      { id: 'rj10', label: 'REJECT', type: 'reject', x: 880,  y: 500 },
+      { id: 'rj10', label: 'REJECT', type: 'reject', x: 660,  y: 580 },
       { id: 'R1',  label: 'R1',  type: 'state', x: 200,  y: 160 },
       { id: 'R2',  label: 'R2',  type: 'state', x: 380,  y: 160 },
       { id: 'R3',  label: 'R3',  type: 'state', x: 200,  y: 300 },
@@ -516,7 +516,35 @@ const linkMarker      = (lnk, i) => {
   return lnk.isSelf ? (active ? 'url(#pda-arr-active-s)' : 'url(#pda-arr-s)')
                     : (active ? 'url(#pda-arr-active)'   : 'url(#pda-arr)')
 }
-const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
+const labelFill = (i) => activeLinkIdx.value === i ? '#1d4ed8' : '#1d4ed8'
+
+// ── Zoom / pan ────────────────────────────────────────────────
+const pdaZoom    = ref(1)
+const pdaPanX    = ref(0)
+const pdaPanY    = ref(0)
+const pdaDrag    = ref(false)
+const pdaDragSt  = ref({ x: 0, y: 0, px: 0, py: 0 })
+const PDA_ZMIN   = 0.1
+const PDA_ZMAX   = 5
+
+const pdaZoomIn    = () => { pdaZoom.value = Math.min(PDA_ZMAX, +(pdaZoom.value * 1.2).toFixed(3)) }
+const pdaZoomOut   = () => { pdaZoom.value = Math.max(PDA_ZMIN, +(pdaZoom.value / 1.2).toFixed(3)) }
+const pdaResetZoom = () => { pdaZoom.value = 1; pdaPanX.value = 0; pdaPanY.value = 0 }
+
+const pdaOnWheel = (e) => {
+  const f = e.deltaY < 0 ? 1.1 : 1 / 1.1
+  pdaZoom.value = Math.min(PDA_ZMAX, Math.max(PDA_ZMIN, +(pdaZoom.value * f).toFixed(3)))
+}
+const pdaOnDragStart = (e) => {
+  pdaDrag.value   = true
+  pdaDragSt.value = { x: e.clientX, y: e.clientY, px: pdaPanX.value, py: pdaPanY.value }
+}
+const pdaOnDrag = (e) => {
+  if (!pdaDrag.value) return
+  pdaPanX.value = pdaDragSt.value.px + (e.clientX - pdaDragSt.value.x)
+  pdaPanY.value = pdaDragSt.value.py + (e.clientY - pdaDragSt.value.y)
+}
+const pdaOnDragEnd = () => { pdaDrag.value = false }
 </script>
 
 <template>
@@ -603,8 +631,23 @@ const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
 
     <!-- Diagram -->
     <div class="pda-viz-card">
-      <div class="viz-head">Pushdown Automata Diagram</div>
-      <div class="image-viewport">
+      <div class="viz-head-row">
+        <div class="viz-head">Pushdown Automata Diagram</div>
+        <div class="zoom-controls">
+          <button class="zoom-btn" title="Zoom in"   @click="pdaZoomIn">+</button>
+          <button class="zoom-btn" title="Zoom out"  @click="pdaZoomOut">−</button>
+          <button class="zoom-btn" title="Reset view" @click="pdaResetZoom">⊙</button>
+        </div>
+      </div>
+      <div
+        class="image-viewport"
+        @wheel.prevent="pdaOnWheel"
+        @mousedown.prevent="pdaOnDragStart"
+        @mousemove="pdaOnDrag"
+        @mouseup="pdaOnDragEnd"
+        @mouseleave="pdaOnDragEnd"
+      >
+        <div :style="{ transform: `translate(${pdaPanX}px,${pdaPanY}px) scale(${pdaZoom})`, transformOrigin: '0 0', display: 'inline-block', width: '100%' }">
         <svg :viewBox="viewBox" style="width:100%;overflow:visible;min-height:300px" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker id="pda-arr" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6" orient="auto">
@@ -677,6 +720,7 @@ const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
             >{{ node.label }}</text>
           </g>
         </svg>
+        </div>
       </div>
     </div>
 
@@ -896,8 +940,23 @@ const labelFill = (i) => activeLinkIdx.value === i ? '#b45309' : '#dc2626'
 .spin { display: inline-block; animation: spin 1.2s linear infinite; }
 
 .pda-viz-card { border:1.5px solid #e8ecf0; border-radius:10px; overflow:hidden; background:#fff; }
-.viz-head { padding:9px 16px; background:#f8fafc; border-bottom:1.5px solid #e8ecf0; font-size:10.5px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; }
-.image-viewport { padding:20px; display:flex; justify-content:center; background:#fafbfc; overflow-x:auto; }
+.viz-head-row { display:flex; align-items:center; justify-content:space-between; padding:9px 12px 9px 16px; background:#f8fafc; border-bottom:1.5px solid #e8ecf0; }
+.viz-head { font-size:10.5px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; }
+.image-viewport { padding:20px; background:#fafbfc; overflow:hidden; cursor:grab; user-select:none; }
+.image-viewport:active { cursor:grabbing; }
+.zoom-controls { display:flex; gap:4px; }
+.zoom-btn {
+  width:28px; height:28px;
+  border:1.5px solid #e1e4e8; border-radius:6px;
+  background:#fff; color:#57606a;
+  font-size:14px; font-weight:700;
+  cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:all 0.13s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  line-height:1;
+}
+.zoom-btn:hover { background:#f0fdf4; border-color:#22c55e; color:#16a34a; }
 
 .no-scrollbar-x { scrollbar-width:none; }
 .no-scrollbar-x::-webkit-scrollbar { display:none; }

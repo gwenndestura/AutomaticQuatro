@@ -88,7 +88,7 @@ const developers = [
 
       <!-- Bottom -->
       <div class="footer-bottom">
-        <span>© {{ new Date().getFullYear() }} Automata Theory Group · DLSUD</span>
+        <span>© {{ new Date().getFullYear() }} Group IV · DLSUD</span>
       </div>
 
     </div>

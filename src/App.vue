@@ -66,20 +66,12 @@ const SIM_TABS = [
       <!-- Problem selection -->
       <div class="sidebar-section">
         <div class="section-label">
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="margin-right:5px;vertical-align:middle">
-            <rect x="1" y="1" width="10" height="10" rx="2" stroke="#8c959f" stroke-width="1.5"/>
-            <path d="M4 6h4M6 4v4" stroke="#8c959f" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
           Select Problem
         </div>
         <Problems :problems="problems" v-model="selectedProblemIndex" />
 
         <div class="regex-block">
           <div class="regex-block-title">
-            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true" style="margin-right:4px;vertical-align:middle">
-              <circle cx="5" cy="5" r="4" stroke="#8c959f" stroke-width="1.3"/>
-              <path d="M5 3v2.5L6.5 7" stroke="#8c959f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
             Regular Expression
           </div>
           <code class="regex-text">{{ currentRegex }}</code>
@@ -91,9 +83,6 @@ const SIM_TABS = [
       <!-- Test inputs -->
       <div class="sidebar-section">
         <div class="section-label">
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true" style="margin-right:5px;vertical-align:middle">
-            <path d="M2 6h8M8 4l2 2-2 2" stroke="#8c959f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
           Test Strings
         </div>
         <InputArea

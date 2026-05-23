@@ -15,6 +15,34 @@ const done = ref(false)
 const simResult = ref(null)
 const autoTimer = ref(null)
 
+// ── Zoom / pan ────────────────────────────────────────────────
+const zoomScale  = ref(1)
+const panX       = ref(0)
+const panY       = ref(0)
+const isDragging = ref(false)
+const dragStart  = ref({ x: 0, y: 0, px: 0, py: 0 })
+const ZOOM_MIN   = 0.25
+const ZOOM_MAX   = 5
+
+const zoomIn    = () => { zoomScale.value = Math.min(ZOOM_MAX, +(zoomScale.value * 1.2).toFixed(3)) }
+const zoomOut   = () => { zoomScale.value = Math.max(ZOOM_MIN, +(zoomScale.value / 1.2).toFixed(3)) }
+const resetZoom = () => { zoomScale.value = 1; panX.value = 0; panY.value = 0 }
+
+const onWheel = (e) => {
+  const f = e.deltaY < 0 ? 1.1 : 1 / 1.1
+  zoomScale.value = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, +(zoomScale.value * f).toFixed(3)))
+}
+const onDragStart = (e) => {
+  isDragging.value = true
+  dragStart.value  = { x: e.clientX, y: e.clientY, px: panX.value, py: panY.value }
+}
+const onDrag = (e) => {
+  if (!isDragging.value) return
+  panX.value = dragStart.value.px + (e.clientX - dragStart.value.x)
+  panY.value = dragStart.value.py + (e.clientY - dragStart.value.y)
+}
+const onDragEnd = () => { isDragging.value = false }
+
 const DFA_CONFIGS = {
   1: {
     start: 'q0',
@@ -338,7 +366,7 @@ const renderDFA = () => {
     const linkLabel = svg.append("g").selectAll("text")
         .data(data.links).join("text").text(d => d.label)
         .attr("font-size", "16px")
-        .attr("fill", "#e63946")
+        .attr("fill", "#1d4ed8")
         .attr("font-weight", "bold")
         .attr("text-anchor", "middle")
         // Create the white background aura effect using stroke
@@ -536,7 +564,23 @@ onUnmounted(() => {
 
     <!-- SVG Visualization -->
     <div class="viz-container">
-      <svg ref="svgRef"></svg>
+      <div class="zoom-controls">
+        <button class="zoom-btn" title="Zoom in"  @click="zoomIn">+</button>
+        <button class="zoom-btn" title="Zoom out" @click="zoomOut">−</button>
+        <button class="zoom-btn" title="Reset view" @click="resetZoom">⊙</button>
+      </div>
+      <div
+        class="viz-scroll-area"
+        @wheel.prevent="onWheel"
+        @mousedown.prevent="onDragStart"
+        @mousemove="onDrag"
+        @mouseup="onDragEnd"
+        @mouseleave="onDragEnd"
+      >
+        <div :style="{ transform: `translate(${panX}px,${panY}px) scale(${zoomScale})`, transformOrigin: '0 0', display: 'inline-block', width: '100%' }">
+          <svg ref="svgRef"></svg>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -791,7 +835,40 @@ onUnmounted(() => {
     border-radius: 10px;
     background: #fafbfc;
     overflow: hidden;
+    position: relative;
 }
+.zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
+}
+.zoom-btn {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid #e1e4e8;
+    border-radius: 6px;
+    background: #fff;
+    color: #57606a;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.13s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    line-height: 1;
+}
+.zoom-btn:hover { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
+.viz-scroll-area {
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+}
+.viz-scroll-area:active { cursor: grabbing; }
 
 .pop-enter-active { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 @keyframes popIn {
