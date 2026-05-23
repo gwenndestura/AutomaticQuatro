@@ -94,7 +94,7 @@ onMounted(() => {
   cursor: pointer;
 }
 .brand-logo {
-  height: 38px;
+  height: 48px;
   width: auto;
   object-fit: contain;
 }
@@ -167,7 +167,7 @@ onMounted(() => {
 /* Responsive */
 @media (max-width: 600px) {
   .navbar { padding: 0 12px; }
-  .brand-logo { height: 28px; }
+  .brand-logo { height: 36px; }
   .nav-tab { padding: 0 10px; font-size: 11px; }
 }
 </style>
