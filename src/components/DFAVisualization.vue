@@ -106,7 +106,7 @@ const DFA_CONFIGS = {
     { source: 'q7',  target: 'q4',   label: 'b' },
 
     { source: 'q8',  target: 'q9',   label: 'a' },
-    { source: 'q8',  target: 'q11',  label: 'b', curve: 1.5, sweep: 1 },
+    { source: 'q8',  target: 'q11',  label: 'b', curve: 1.8, sweep: 1, labelOffset: -40 },
 
     { source: 'q9',  target: 'qT9',  label: 'a' },
     { source: 'q9',  target: 'q10',  label: 'b' },
@@ -114,7 +114,7 @@ const DFA_CONFIGS = {
     { source: 'q10', target: 'q8',   label: 'a' },
     { source: 'q10', target: 'qT10', label: 'b' },
 
-    { source: 'q11', target: 'q8',   label: 'a', curve: 1.5, sweep: 0 },
+    { source: 'q11', target: 'q8',   label: 'a', curve: 1.8, sweep: 1, labelOffset: 40 },
     { source: 'q11', target: 'q12',  label: 'b' },
 
     { source: 'q12', target: 'q13',  label: 'a' },
@@ -504,7 +504,8 @@ link.attr("d", d => {
         })
         .attr("y", d => {
             if (d.source === d.target) return d.source.y - 52;
-            return link.nodes()[data.links.indexOf(d)].getPointAtLength(0.5 * link.nodes()[data.links.indexOf(d)].getTotalLength()).y;
+            const midY = link.nodes()[data.links.indexOf(d)].getPointAtLength(0.5 * link.nodes()[data.links.indexOf(d)].getTotalLength()).y;
+            return midY + (d.labelOffset || 0);
         });
 
     node.attr("cx", d => d.x).attr("cy", d => d.y);
@@ -957,4 +958,3 @@ onUnmounted(() => {
   display: none;
 }
 </style>
-
