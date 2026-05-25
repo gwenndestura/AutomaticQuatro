@@ -106,7 +106,7 @@ const DFA_CONFIGS = {
     { source: 'q7',  target: 'q4',   label: 'b' },
 
     { source: 'q8',  target: 'q9',   label: 'a' },
-    { source: 'q8',  target: 'q11',  label: 'b', cpOffset: -70, labelFrac: 0.35 },
+    { source: 'q8',  target: 'q11',  label: 'b', cpOffset: -60, labelFrac: 0.5 },
 
     { source: 'q9',  target: 'qT9',  label: 'a' },
     { source: 'q9',  target: 'q10',  label: 'b' },
@@ -114,7 +114,7 @@ const DFA_CONFIGS = {
     { source: 'q10', target: 'q8',   label: 'a' },
     { source: 'q10', target: 'qT10', label: 'b' },
 
-    { source: 'q11', target: 'q8',   label: 'a', cpOffset: 70, labelFrac: 0.35 },
+    { source: 'q11', target: 'q8',   label: 'a', cpOffset: -120, labelFrac: 0.5 },
     { source: 'q11', target: 'q12',  label: 'b' },
 
     { source: 'q12', target: 'q13',  label: 'a' },
@@ -474,6 +474,7 @@ link.attr("d", d => {
         const mx = (d.source.x + d.target.x) / 2;
         const my = (d.source.y + d.target.y) / 2;
         const len = Math.sqrt(dx * dx + dy * dy);
+        // Perpendicular offset
         const px = -dy / len * d.cpOffset;
         const py =  dx / len * d.cpOffset;
         const cpx = mx + px;
