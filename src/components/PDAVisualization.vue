@@ -201,9 +201,10 @@ const PDA_CONFIGS = {
       { src: 'S12', tgt: 'S13',   label: 'a' },
       { src: 'S12', tgt: 'rjS12', label: 'b,Δ' },
 
-      // S13 hub (updated): b→S20 (exit to bb), a→S17 (aba loop), Δ→reject
-      { src: 'S13', tgt: 'S20',   label: 'b', curve: 10001 },
+      // S13 hub: a→S17 (aba loop), b→S14 (bab loop) OR b→S20 (exit to bb), Δ→reject
       { src: 'S13', tgt: 'S17',   label: 'a' },
+      { src: 'S13', tgt: 'S14',   label: 'b' },
+      { src: 'S13', tgt: 'S20',   label: 'b', curve: 10001 },
       { src: 'S13', tgt: 'rjS13', label: 'Δ' },
 
       // S14 (bab loop middle): a→S15, b/Δ→reject
@@ -226,8 +227,8 @@ const PDA_CONFIGS = {
       { src: 'S20', tgt: 'S21',   label: 'b' },
       { src: 'S20', tgt: 'rjS20', label: 'a,Δ' },
 
-      // S21 ((a+b)*): a,b→S30, Δ→S30 (epsilon — allow zero-length (a+b)*)
-      { src: 'S21', tgt: 'S30',   label: 'a,b' },
+      // S21 ((a+b)*): self-loop then ε→S30
+      { src: 'S21', tgt: 'S21',   label: 'a,b' },
       { src: 'S21', tgt: 'S30',   label: 'Δ' },
 
       // S30 (branch into bab/aba ninth block): b→S31, a→S34, Δ→reject

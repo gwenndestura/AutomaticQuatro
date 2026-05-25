@@ -11,11 +11,17 @@ const inputVal  = ref('')
 const history   = ref([])
 
 // ── Suggestions per problem regex signature ──────────────────
-const P1_SUGGESTIONS = ['bab', 'bababa', 'bbbababbbab', 'bbabaaba', 'baabbaabb']
-const P2_SUGGESTIONS = ['101', '1010', '000101', '0001010', '111001']
+const P1_SUGGESTIONS = {
+  valid:   ['bbbababbbab', 'babababbbab', 'bbbababbaba'],
+  invalid: ['bab', 'bababa', 'bbabaaba', 'baabbaabb']
+}
+const P2_SUGGESTIONS = {
+  valid:   ['000101', '0001010', '101111'],
+  invalid: ['101', '1010', '111001']
+}
 
 const suggestions = computed(() => {
-  if (!props.regexStr) return []
+  if (!props.regexStr) return { valid: [], invalid: [] }
   return props.regexStr.includes('bab') ? P1_SUGGESTIONS : P2_SUGGESTIONS
 })
 
@@ -94,14 +100,27 @@ watch(() => props.regexStr, () => {
     </div>
 
     <!-- Suggestions -->
-    <div class="ia-suggest-label">Suggestions</div>
-    <div class="ia-chips">
-      <button
-        v-for="s in suggestions"
-        :key="s"
-        class="ia-chip"
-        @click="useSuggestion(s)"
-      >{{ s }}</button>
+    <div class="ia-suggest-section">
+      <div class="ia-suggest-label ia-suggest-valid-label">Valid Examples</div>
+      <div class="ia-chips">
+        <button
+          v-for="s in suggestions.valid"
+          :key="s"
+          class="ia-chip ia-chip-valid"
+          @click="useSuggestion(s)"
+        >{{ s }}</button>
+      </div>
+    </div>
+    <div class="ia-suggest-section">
+      <div class="ia-suggest-label ia-suggest-invalid-label">Invalid Examples</div>
+      <div class="ia-chips">
+        <button
+          v-for="s in suggestions.invalid"
+          :key="s"
+          class="ia-chip ia-chip-invalid"
+          @click="useSuggestion(s)"
+        >{{ s }}</button>
+      </div>
     </div>
 
     <!-- History -->
@@ -243,13 +262,19 @@ watch(() => props.regexStr, () => {
 }
 
 /* Suggestions */
+.ia-suggest-section {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 .ia-suggest-label {
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8c959f;
 }
+.ia-suggest-valid-label   { color: #16a34a; }
+.ia-suggest-invalid-label { color: #b91c1c; }
 .ia-chips {
   display: flex;
   flex-wrap: wrap;
@@ -262,15 +287,29 @@ watch(() => props.regexStr, () => {
   background: #f6f8fa;
   font-family: 'SFMono-Regular', 'Consolas', monospace;
   font-size: 11px;
-  color: #0550ae;
   cursor: pointer;
   transition: all 0.13s;
   line-height: 1;
 }
-.ia-chip:hover {
-  border-color: #22c55e;
+.ia-chip-valid {
+  color: #166534;
+  border-color: #bbf7d0;
   background: #f0fdf4;
-  color: #16a34a;
+}
+.ia-chip-valid:hover {
+  border-color: #16a34a;
+  background: #dcfce7;
+  color: #14532d;
+}
+.ia-chip-invalid {
+  color: #991b1b;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+.ia-chip-invalid:hover {
+  border-color: #dc2626;
+  background: #fee2e2;
+  color: #7f1d1d;
 }
 
 /* History */
