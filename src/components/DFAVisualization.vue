@@ -58,21 +58,23 @@ const DFA_CONFIGS = {
       { id: 'q6',   label: '',  type: 'state',  fx: 720,  fy: 140 },
       { id: 'q7',   label: '',  type: 'state',  fx: 900,  fy: 0 },
       { id: 'q8',   label: '',  type: 'state',  fx: 1080, fy: 0 },
-      { id: 'q9',   label: '',  type: 'state',  fx: 1260, fy: -120 },
-      { id: 'q10',  label: '',  type: 'state',  fx: 1260, fy: 120 },
-      { id: 'q11',  label: '',  type: 'state',  fx: 1440, fy: 0 },
-      { id: 'q12',  label: '',  type: 'state',  fx: 1620, fy: 0 },
-      { id: 'q13',  label: '',  type: 'state',  fx: 1800, fy: -120 },
-      { id: 'q14',  label: '',  type: 'state',  fx: 1800, fy: 120 },
-      { id: 'q15',  label: '',  type: 'state',  fx: 1980, fy: -120 },
-      { id: 'q16',  label: '',  type: 'state',  fx: 1980, fy: 120 },
-      { id: 'q17',  label: '+', type: 'accept', fx: 2160, fy: 0 },
+      { id: 'q9',   label: '',  type: 'state',  fx: 1240, fy: -160 },
+      { id: 'q10',  label: '',  type: 'state',  fx: 1240, fy: 160 },
+      { id: 'q11',  label: '',  type: 'state',  fx: 1500, fy: 0 },
+      { id: 'q12',  label: '',  type: 'state',  fx: 1700, fy: 0 },
+      { id: 'q13',  label: '',  type: 'state',  fx: 1900, fy: -120 },
+      { id: 'q14',  label: '',  type: 'state',  fx: 1900, fy: 120 },
+      { id: 'q15',  label: '',  type: 'state',  fx: 2080, fy: -120 },
+      { id: 'q16',  label: '',  type: 'state',  fx: 2080, fy: 120 },
+      { id: 'q17',  label: '+', type: 'accept', fx: 2260, fy: 0 },
       // Separate trap nodes — one per source that goes to trap
       { id: 'qT_q0',  label: 'T', type: 'trap', fx: 0,    fy: -140 },
       { id: 'qT_q2',  label: 'T', type: 'trap', fx: 380,  fy: -260 },
       { id: 'qT_q3',  label: 'T', type: 'trap', fx: 380,  fy: 260 },
-      { id: 'qT_q9',  label: 'T', type: 'trap', fx: 1260, fy: -280 },
-      { id: 'qT_q10', label: 'T', type: 'trap', fx: 1340, fy: 280 },
+      { id: 'qT_q9',  label: 'T', type: 'trap', fx: 1240, fy: -320 },
+      { id: 'qT_q10', label: 'T', type: 'trap', fx: 1240, fy: 320 },
+      { id: 'q11b',   label: '',  type: 'state', fx: 1080, fy: 220 },
+      { id: 'qT_q11b',label: 'T', type: 'trap',  fx: 900,  fy: 340 },
     ],
 
     links: [
@@ -100,17 +102,22 @@ const DFA_CONFIGS = {
       { source: 'q7',  target: 'q8',     label: 'a' },
       { source: 'q7',  target: 'q4',     label: 'b' },
 
-      { source: 'q8',  target: 'q9',     label: 'a' },
-      { source: 'q8',  target: 'q11',    label: 'b' },
+      { source: 'q8',  target: 'q9',     label: 'a', sweep: 1 },
+      { source: 'q8',  target: 'q11',    label: 'b', sweep: 0 },
 
       { source: 'q9',  target: 'qT_q9',  label: 'a' },
-      { source: 'q9',  target: 'q10',    label: 'b' },
+      { source: 'q9',  target: 'q10',    label: 'b', sweep: 1 },
 
-      { source: 'q10', target: 'q8',     label: 'a' },
+      { source: 'q10', target: 'q8',     label: 'a', sweep: 1 },
       { source: 'q10', target: 'qT_q10', label: 'b' },
 
-      { source: 'q11', target: 'q8',     label: 'a' },
+      { source: 'q11', target: 'q11b',   label: 'a', sweep: 1 },
       { source: 'q11', target: 'q12',    label: 'b' },
+
+      { source: 'q11b', target: 'q8',        label: 'b', sweep: 1 },
+      { source: 'q11b', target: 'qT_q11b',   label: 'a', sweep: 0 },
+
+      { source: 'qT_q11b', target: 'qT_q11b', label: 'a, b' },
 
       { source: 'q12', target: 'q13',    label: 'a' },
       { source: 'q12', target: 'q14',    label: 'b' },
@@ -154,7 +161,9 @@ const DFA_CONFIGS = {
       qT_q9:   { a: 'qT_q9',  b: 'qT_q9' },
       q10:     { a: 'q8',     b: 'qT_q10' },
       qT_q10:  { a: 'qT_q10', b: 'qT_q10' },
-      q11:     { a: 'q8',     b: 'q12' },
+      q11:     { a: 'q11b',    b: 'q12' },
+      q11b:    { a: 'qT_q11b', b: 'q8' },
+      qT_q11b: { a: 'qT_q11b', b: 'qT_q11b' },
       q12:     { a: 'q13',    b: 'q14' },
       q13:     { a: 'q13',    b: 'q15' },
       q14:     { a: 'q16',    b: 'q14' },
@@ -549,6 +558,7 @@ watch(() => props.simKey, () => {
 
 onMounted(() => {
     renderDFA();
+    if (props.testString) runAuto();
 });
 
 onUnmounted(() => {

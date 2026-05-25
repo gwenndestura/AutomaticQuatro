@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   problemId: { type: Number, required: true },
@@ -90,171 +90,116 @@ const PDA_CONFIGS = {
   // ── Problem 1  (S states, a/b alphabet) ─────────────────────────────────
   1: {
     nodes: [
-      { id: 'START',  label: 'START',  type: 'start',  x:  100, y: 300 },
-      { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 3020, y: 300 },
+      { id: 'START',  label: 'START',  type: 'start',  x:   60, y: 360 },
+      { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 2140, y: 480 },
 
       // Reject nodes
-      { id: 'rjS1',  label: 'REJECT', type: 'reject', x:  240, y: 120 },
-      { id: 'rjS2',  label: 'REJECT', type: 'reject', x:  400, y: 120 },
-      { id: 'rjS3',  label: 'REJECT', type: 'reject', x:  540, y:  40 },
-      { id: 'rjS4',  label: 'REJECT', type: 'reject', x:  540, y: 560 },
-      { id: 'rjS7a', label: 'REJECT', type: 'reject', x:  980, y:  40 },
-      { id: 'rjS7b', label: 'REJECT', type: 'reject', x:  980, y: 560 },
-      { id: 'rjS8',  label: 'REJECT', type: 'reject', x: 1200, y: 120 },
-      { id: 'rjS9',  label: 'REJECT', type: 'reject', x: 1120, y:  40 },
-      { id: 'rjS11', label: 'REJECT', type: 'reject', x: 1360, y: 120 },
-      { id: 'rjS12', label: 'REJECT', type: 'reject', x: 1500, y: 120 },
-      { id: 'rjS13', label: 'REJECT', type: 'reject', x: 1660, y: 120 },
-      { id: 'rjS14', label: 'REJECT', type: 'reject', x: 1800, y:  40 },
-      { id: 'rjS15', label: 'REJECT', type: 'reject', x: 1940, y:  40 },
-      { id: 'rjS17', label: 'REJECT', type: 'reject', x: 1800, y: 560 },
-      { id: 'rjS18', label: 'REJECT', type: 'reject', x: 1940, y: 560 },
-      { id: 'rjS20', label: 'REJECT', type: 'reject', x: 2100, y: 120 },
-      { id: 'rjS21', label: 'REJECT', type: 'reject', x: 2260, y: 120 },
-      { id: 'rjS30', label: 'REJECT', type: 'reject', x: 2420, y: 120 },
-      { id: 'rjS31', label: 'REJECT', type: 'reject', x: 2560, y:  40 },
-      { id: 'rjS32', label: 'REJECT', type: 'reject', x: 2700, y:  40 },
-      { id: 'rjS34', label: 'REJECT', type: 'reject', x: 2560, y: 560 },
-      { id: 'rjS35', label: 'REJECT', type: 'reject', x: 2700, y: 560 },
+      { id: 'rjQ0',  label: 'REJECT', type: 'reject', x:  200, y: 140 },
+      { id: 'rjQ1',  label: 'REJECT', type: 'reject', x:  360, y: 140 },
+      { id: 'rjQ2',  label: 'REJECT', type: 'reject', x:  520, y:  80 },
+      { id: 'rjQ3',  label: 'REJECT', type: 'reject', x:  520, y: 640 },
+      { id: 'rjQ4',  label: 'REJECT', type: 'reject', x:  680, y: 140 },
+      { id: 'rjQ5',  label: 'REJECT', type: 'reject', x:  840, y: 100 },
+      { id: 'rjQ6',  label: 'REJECT', type: 'reject', x:  840, y: 620 },
+      { id: 'rjQ7',  label: 'REJECT', type: 'reject', x: 1000, y: 140 },
+      { id: 'rjQ8',  label: 'REJECT', type: 'reject', x: 1160, y: 140 },
+      { id: 'rjQ9',  label: 'REJECT', type: 'reject', x: 1320, y: 100 },
+      { id: 'rjQ10', label: 'REJECT', type: 'reject', x: 1480, y: 100 },
+      { id: 'rjQ11', label: 'REJECT', type: 'reject', x: 1320, y: 620 },
+      { id: 'rjQ12', label: 'REJECT', type: 'reject', x: 1480, y: 620 },
+      { id: 'rjQ13', label: 'REJECT', type: 'reject', x: 1640, y: 100 },
+      { id: 'rjQ14', label: 'REJECT', type: 'reject', x: 1640, y: 640 },
+      { id: 'rjQ15', label: 'REJECT', type: 'reject', x: 1800, y: 140 },
+      { id: 'rjQ16', label: 'REJECT', type: 'reject', x: 1960, y: 100 },
 
-      // State nodes
-      { id: 'S1',  label: 'READ', type: 'state', x:  240, y: 300 },
-      { id: 'S2',  label: 'READ', type: 'state', x:  400, y: 300 },
-      { id: 'S3',  label: 'READ', type: 'state', x:  540, y: 160 },
-      { id: 'S4',  label: 'READ', type: 'state', x:  540, y: 440 },
-      { id: 'S5',  label: 'READ', type: 'state', x:  680, y: 300 },
-      { id: 'S6',  label: 'READ', type: 'state', x:  840, y: 300 },
-      { id: 'S7a', label: 'READ', type: 'state', x:  980, y: 160 },
-      { id: 'S7b', label: 'READ', type: 'state', x:  980, y: 440 },
-      { id: 'S8',  label: 'READ', type: 'state', x: 1200, y: 300 },
-      { id: 'S9',  label: 'READ', type: 'state', x: 1120, y: 160 },
-      { id: 'S11', label: 'READ', type: 'state', x: 1360, y: 300 },
-      { id: 'S12', label: 'READ', type: 'state', x: 1500, y: 300 },
-      { id: 'S13', label: 'READ', type: 'state', x: 1660, y: 300 },
-      { id: 'S14', label: 'READ', type: 'state', x: 1800, y: 160 },
-      { id: 'S15', label: 'READ', type: 'state', x: 1940, y: 160 },
-      { id: 'S17', label: 'READ', type: 'state', x: 1800, y: 440 },
-      { id: 'S18', label: 'READ', type: 'state', x: 1940, y: 440 },
-      { id: 'S20', label: 'READ', type: 'state', x: 2100, y: 300 },
-      { id: 'S21', label: 'READ', type: 'state', x: 2260, y: 300 },
-      { id: 'S30', label: 'READ', type: 'state', x: 2420, y: 300 },
-      { id: 'S31', label: 'READ', type: 'state', x: 2560, y: 160 },
-      { id: 'S32', label: 'READ', type: 'state', x: 2700, y: 160 },
-      { id: 'S34', label: 'READ', type: 'state', x: 2560, y: 440 },
-      { id: 'S35', label: 'READ', type: 'state', x: 2700, y: 440 },
-      { id: 'S33', label: 'READ', type: 'state', x: 2860, y: 300 },
+      // State nodes (diamonds)
+      { id: 'q0',  label: 'q0',  type: 'state', x:  200, y: 360 },
+      { id: 'q1',  label: 'q1',  type: 'state', x:  360, y: 360 },
+      { id: 'q2',  label: 'q2',  type: 'state', x:  520, y: 200 },
+      { id: 'q3',  label: 'q3',  type: 'state', x:  520, y: 520 },
+      { id: 'q4',  label: 'q4',  type: 'state', x:  680, y: 360 },
+      { id: 'q5',  label: 'q5',  type: 'state', x:  840, y: 240 },
+      { id: 'q6',  label: 'q6',  type: 'state', x:  840, y: 480 },
+      { id: 'q7',  label: 'q7',  type: 'state', x: 1000, y: 360 },
+      { id: 'q8',  label: 'q8',  type: 'state', x: 1160, y: 360 },
+      { id: 'q9',  label: 'q9',  type: 'state', x: 1320, y: 240 },
+      { id: 'q10', label: 'q10', type: 'state', x: 1480, y: 240 },
+      { id: 'q11', label: 'q11', type: 'state', x: 1320, y: 480 },
+      { id: 'q12', label: 'q12', type: 'state', x: 1480, y: 480 },
+      { id: 'q13', label: 'q13', type: 'state', x: 1640, y: 240 },
+      { id: 'q14', label: 'q14', type: 'state', x: 1640, y: 480 },
+      { id: 'q15', label: 'q15', type: 'state', x: 1800, y: 360 },
+      { id: 'q16', label: 'q16', type: 'state', x: 1960, y: 240 },
+      { id: 'q17', label: 'q17', type: 'state', x: 1960, y: 480 },
     ],
     links: [
-      { src: 'START', tgt: 'S1',    label: '' },
+      { src: 'START', tgt: 'q0' },
 
-      // S1: b→S2, a/Δ→reject
-      { src: 'S1',  tgt: 'S2',    label: 'b' },
-      { src: 'S1',  tgt: 'rjS1',  label: 'a,Δ' },
+      { src: 'q0',  tgt: 'q1',    label: 'b' },
+      { src: 'q0',  tgt: 'rjQ0',  label: 'a,Δ' },
 
-      // S2: a→S3, b→S4, Δ→reject
-      { src: 'S2',  tgt: 'S3',    label: 'a' },
-      { src: 'S2',  tgt: 'S4',    label: 'b' },
-      { src: 'S2',  tgt: 'rjS2',  label: 'Δ' },
+      { src: 'q1',  tgt: 'q2',    label: 'a' },
+      { src: 'q1',  tgt: 'q3',    label: 'b' },
+      { src: 'q1',  tgt: 'rjQ1',  label: 'Δ' },
 
-      // S3 (bab): b→S5, a/Δ→reject
-      { src: 'S3',  tgt: 'S5',    label: 'b' },
-      { src: 'S3',  tgt: 'rjS3',  label: 'a,Δ' },
+      { src: 'q2',  tgt: 'q4',    label: 'b' },
+      { src: 'q2',  tgt: 'rjQ2',  label: 'a,Δ' },
 
-      // S4 (bbb): b→S5, a/Δ→reject
-      { src: 'S4',  tgt: 'S5',    label: 'b' },
-      { src: 'S4',  tgt: 'rjS4',  label: 'a,Δ' },
+      { src: 'q3',  tgt: 'q4',    label: 'b' },
+      { src: 'q3',  tgt: 'rjQ3',  label: 'a,Δ' },
 
-      // S5 (a*b*): a→S5, b→S6, Δ→S8 (epsilon — allow skipping b* entirely)
-      { src: 'S5',  tgt: 'S5',    label: 'a' },
-      { src: 'S5',  tgt: 'S6',    label: 'b' },
-      { src: 'S5',  tgt: 'S8',    label: 'Δ', curve: 1.5, sweep: 1 },
+      { src: 'q4',  tgt: 'q5',    label: 'a' },
+      { src: 'q4',  tgt: 'q6',    label: 'b' },
+      { src: 'q4',  tgt: 'rjQ4',  label: 'Δ' },
 
-      // S6 (a*+b* branch): a→S7a, b→S7b, Δ→S8
-      { src: 'S6',  tgt: 'S7a',   label: 'a' },
-      { src: 'S6',  tgt: 'S7b',   label: 'b' },
-      { src: 'S6',  tgt: 'S8',    label: 'Δ', curve: 1.5, sweep: 0 },
+      { src: 'q5',  tgt: 'q5',    label: 'a' },
+      { src: 'q5',  tgt: 'q7',    label: 'b' },
+      { src: 'q5',  tgt: 'rjQ5',  label: 'Δ' },
 
-      // S7a (a* branch): a→S7a, Δ→S8, b→reject
-      { src: 'S7a', tgt: 'S7a',   label: 'a' },
-      { src: 'S7a', tgt: 'S8',    label: 'Δ' },
-      { src: 'S7a', tgt: 'rjS7a', label: 'b' },
+      { src: 'q6',  tgt: 'q5',    label: 'a' },
+      { src: 'q6',  tgt: 'q6',    label: 'b' },
+      { src: 'q6',  tgt: 'rjQ6',  label: 'Δ' },
 
-      // S7b (b* branch): b→S7b, Δ→S8, a→reject
-      { src: 'S7b', tgt: 'S7b',   label: 'b' },
-      { src: 'S7b', tgt: 'S8',    label: 'Δ' },
-      { src: 'S7b', tgt: 'rjS7b', label: 'a' },
+      { src: 'q7',  tgt: 'q8',    label: 'a' },
+      { src: 'q7',  tgt: 'q4',    label: 'b' },
+      { src: 'q7',  tgt: 'rjQ7',  label: 'Δ' },
 
-      // S8 ((ba)*): b→S9, a→S11, Δ→reject
-      { src: 'S8',  tgt: 'S9',    label: 'b' },
-      { src: 'S8',  tgt: 'S11',   label: 'a' },
-      { src: 'S8',  tgt: 'rjS8',  label: 'Δ' },
+      { src: 'q8',  tgt: 'q9',    label: 'a' },
+      { src: 'q8',  tgt: 'q11',   label: 'b' },
+      { src: 'q8',  tgt: 'rjQ8',  label: 'Δ' },
 
-      // S9 (ba loop): a→S8, b/Δ→reject
-      { src: 'S9',  tgt: 'S8',    label: 'a' },
-      { src: 'S9',  tgt: 'rjS9',  label: 'b,Δ' },
+      { src: 'q9',  tgt: 'q10',   label: 'b' },
+      { src: 'q9',  tgt: 'rjQ9',  label: 'a,Δ' },
 
-      // S11 (aba first a): b→S12, a/Δ→reject
-      { src: 'S11', tgt: 'S12',   label: 'b' },
-      { src: 'S11', tgt: 'rjS11', label: 'a,Δ' },
+      { src: 'q10', tgt: 'q8',    label: 'a' },
+      { src: 'q10', tgt: 'rjQ10', label: 'b,Δ' },
 
-      // S12 (aba middle b): a→S13, b/Δ→reject
-      { src: 'S12', tgt: 'S13',   label: 'a' },
-      { src: 'S12', tgt: 'rjS12', label: 'b,Δ' },
+      { src: 'q11', tgt: 'q8',    label: 'a' },
+      { src: 'q11', tgt: 'q12',   label: 'b' },
+      { src: 'q11', tgt: 'rjQ11', label: 'Δ' },
 
-      // S13 hub: a→S17 (aba loop), b→S14 (bab loop) OR b→S20 (exit to bb), Δ→reject
-      { src: 'S13', tgt: 'S17',   label: 'a' },
-      { src: 'S13', tgt: 'S14',   label: 'b' },
-      { src: 'S13', tgt: 'S20',   label: 'b', curve: 10001 },
-      { src: 'S13', tgt: 'rjS13', label: 'Δ' },
+      { src: 'q12', tgt: 'q13',   label: 'a' },
+      { src: 'q12', tgt: 'q14',   label: 'b' },
+      { src: 'q12', tgt: 'rjQ12', label: 'Δ' },
 
-      // S14 (bab loop middle): a→S15, b/Δ→reject
-      { src: 'S14', tgt: 'S15',   label: 'a' },
-      { src: 'S14', tgt: 'rjS14', label: 'b,Δ' },
+      { src: 'q13', tgt: 'q13',   label: 'a' },
+      { src: 'q13', tgt: 'q15',   label: 'b' },
+      { src: 'q13', tgt: 'rjQ13', label: 'Δ' },
 
-      // S15 (bab loop end): b→S13, a/Δ→reject
-      { src: 'S15', tgt: 'S13',   label: 'b', curve: 1.5, sweep: 1 },
-      { src: 'S15', tgt: 'rjS15', label: 'a,Δ' },
+      { src: 'q14', tgt: 'q16',   label: 'a' },
+      { src: 'q14', tgt: 'q14',   label: 'b' },
+      { src: 'q14', tgt: 'rjQ14', label: 'Δ' },
 
-      // S17 (aba loop first b): b→S18, a/Δ→reject
-      { src: 'S17', tgt: 'S18',   label: 'b' },
-      { src: 'S17', tgt: 'rjS17', label: 'a,Δ' },
+      { src: 'q15', tgt: 'q17',   label: 'a' },
+      { src: 'q15', tgt: 'q14',   label: 'b' },
+      { src: 'q15', tgt: 'rjQ15', label: 'Δ' },
 
-      // S18 (aba loop end a): a→S13, b/Δ→reject
-      { src: 'S18', tgt: 'S13',   label: 'a', curve: 1.5, sweep: 0 },
-      { src: 'S18', tgt: 'rjS18', label: 'b,Δ' },
+      { src: 'q16', tgt: 'q13',   label: 'a' },
+      { src: 'q16', tgt: 'q17',   label: 'b' },
+      { src: 'q16', tgt: 'rjQ16', label: 'Δ' },
 
-      // S20 (bb first b): b→S21, a/Δ→reject
-      { src: 'S20', tgt: 'S21',   label: 'b' },
-      { src: 'S20', tgt: 'rjS20', label: 'a,Δ' },
-
-      // S21 ((a+b)*): self-loop then ε→S30
-      { src: 'S21', tgt: 'S21',   label: 'a,b' },
-      { src: 'S21', tgt: 'S30',   label: 'Δ' },
-
-      // S30 (branch into bab/aba ninth block): b→S31, a→S34, Δ→reject
-      { src: 'S30', tgt: 'S31',   label: 'b' },
-      { src: 'S30', tgt: 'S34',   label: 'a' },
-      { src: 'S30', tgt: 'rjS30', label: 'Δ' },
-
-      // S31 (ninth bab: middle): a→S32, b/Δ→reject
-      { src: 'S31', tgt: 'S32',   label: 'a' },
-      { src: 'S31', tgt: 'rjS31', label: 'b,Δ' },
-
-      // S32 (ninth bab: end): b→S33, a/Δ→reject
-      { src: 'S32', tgt: 'S33',   label: 'b' },
-      { src: 'S32', tgt: 'rjS32', label: 'a,Δ' },
-
-      // S34 (ninth aba: first b): b→S35, a/Δ→reject
-      { src: 'S34', tgt: 'S35',   label: 'b' },
-      { src: 'S34', tgt: 'rjS34', label: 'a,Δ' },
-
-      // S35 (ninth aba: end a): a→S33, b/Δ→reject
-      { src: 'S35', tgt: 'S33',   label: 'a' },
-      { src: 'S35', tgt: 'rjS35', label: 'b,Δ' },
-
-      // S33 (final (a+b)*): a,b→S33, Δ→ACCEPT
-      { src: 'S33', tgt: 'S33',   label: 'a,b' },
-      { src: 'S33', tgt: 'ACCEPT', label: 'Δ' },
+      { src: 'q17', tgt: 'q17',   label: 'a,b' },
+      { src: 'q17', tgt: 'ACCEPT', label: 'Δ' },
     ]
   }
 }
@@ -403,7 +348,7 @@ const buildPath = (input) => {
 
     for (const t of avail) {
       if (result) break
-      const parts   = t.label.split(',').map(s => s.trim())
+      const parts   = (t.label ?? '').split(',').map(s => s.trim())
       const charHit = char !== null && parts.includes(char)
       const epsHit  = parts.includes('Δ') || parts.includes('')
 
@@ -452,19 +397,19 @@ const buildPath = (input) => {
 
     if (char !== null) {
       for (const t of avail) {
-        if (t.label.split(',').map(s => s.trim()).includes(char)) { matched = t; break }
+        if ((t.label ?? '').split(',').map(s => s.trim()).includes(char)) { matched = t; break }
       }
     }
     if (!matched) {
       for (const t of avail) {
-        const parts = t.label.split(',').map(s => s.trim())
+        const parts = (t.label ?? '').split(',').map(s => s.trim())
         if (parts.includes('Δ') || parts.includes('')) { matched = t; break }
       }
     }
 
     if (!matched) break
     path[path.length - 1] = { ...path[path.length - 1], linkIdx: matched.idx }
-    if (char !== null && matched.label.split(',').map(s => s.trim()).includes(char)) pos++
+    if (char !== null && (matched.label ?? '').split(',').map(s => s.trim()).includes(char)) pos++
     node = matched.tgt
   }
   return path
@@ -496,6 +441,7 @@ const runAuto = () => {
 watch(() => props.simKey,     () => { if (props.testString != null) runAuto() })
 watch(() => props.testString, (v)  => { v != null ? runAuto() : doReset() })
 watch(() => props.problemId,  ()   => doReset())
+onMounted(() => { if (props.testString) runAuto() })
 onUnmounted(() => clearInterval(animTimer))
 
 // ── Node / link visual helpers ───────────────────────────────────────────────
