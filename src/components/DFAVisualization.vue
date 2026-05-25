@@ -106,7 +106,7 @@ const DFA_CONFIGS = {
     { source: 'q7',  target: 'q4',   label: 'b' },
 
     { source: 'q8',  target: 'q9',   label: 'a' },
-    { source: 'q8',  target: 'q11',  label: 'b', curve: 1.8, sweep: 1 },
+    { source: 'q8',  target: 'q11',  label: 'b', cpOffset: -70, labelFrac: 0.35 },
 
     { source: 'q9',  target: 'qT9',  label: 'a' },
     { source: 'q9',  target: 'q10',  label: 'b' },
@@ -114,7 +114,7 @@ const DFA_CONFIGS = {
     { source: 'q10', target: 'q8',   label: 'a' },
     { source: 'q10', target: 'qT10', label: 'b' },
 
-    { source: 'q11', target: 'q8',   label: 'a', curve: 1.8, sweep: 0 },
+    { source: 'q11', target: 'q8',   label: 'a', cpOffset: 70, labelFrac: 0.35 },
     { source: 'q11', target: 'q12',  label: 'b' },
 
     { source: 'q12', target: 'q13',  label: 'a' },
@@ -469,10 +469,22 @@ link.attr("d", d => {
         return `M${cx - edgeDx},${cy - edgeDy} A ${loopR} ${loopR} 0 1 1 ${cx + edgeDx},${cy - edgeDy}`;
     }
 
-    // 2. Calculate Distance
+    // 2. Handle manual control-point offset (quadratic bezier) for parallel bidirectional arrows
+    if (d.cpOffset !== undefined) {
+        const mx = (d.source.x + d.target.x) / 2;
+        const my = (d.source.y + d.target.y) / 2;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const px = -dy / len * d.cpOffset;
+        const py =  dx / len * d.cpOffset;
+        const cpx = mx + px;
+        const cpy = my + py;
+        return `M${d.source.x},${d.source.y} Q${cpx},${cpy} ${d.target.x},${d.target.y}`;
+    }
+
+    // 3. Calculate Distance
     let dr = Math.sqrt(dx * dx + dy * dy);
     
-    // 3. Determine Sweep (Direction of the curve)
+    // 4. Determine Sweep (Direction of the curve)
     let finalSweep;
     if (d.sweep !== undefined) {
         finalSweep = d.sweep;
@@ -482,7 +494,7 @@ link.attr("d", d => {
         finalSweep = sourceNum < targetNum ? 1 : 0;
     }
 
-    // 4. Determine Radius (Intensity of the curve)
+    // 5. Determine Radius (Intensity of the curve)
     if (d.curve && d.curve > 1000) {
         return `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`;
     } else {
@@ -495,12 +507,14 @@ link.attr("d", d => {
         .attr("x", d => {
             if (d.source === d.target) return d.source.x;
             const pathEl = link.nodes()[data.links.indexOf(d)];
-            return pathEl.getPointAtLength(0.5 * pathEl.getTotalLength()).x;
+            const frac = d.labelFrac !== undefined ? d.labelFrac : 0.5;
+            return pathEl.getPointAtLength(frac * pathEl.getTotalLength()).x;
         })
         .attr("y", d => {
             if (d.source === d.target) return d.source.y - 52;
             const pathEl = link.nodes()[data.links.indexOf(d)];
-            return pathEl.getPointAtLength(0.5 * pathEl.getTotalLength()).y;
+            const frac = d.labelFrac !== undefined ? d.labelFrac : 0.5;
+            return pathEl.getPointAtLength(frac * pathEl.getTotalLength()).y;
         });
 
     node.attr("cx", d => d.x).attr("cy", d => d.y);
@@ -953,4 +967,3 @@ onUnmounted(() => {
   display: none;
 }
 </style>
-
