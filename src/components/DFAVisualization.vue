@@ -44,64 +44,126 @@ const onDrag = (e) => {
 const onDragEnd = () => { isDragging.value = false }
 
 const DFA_CONFIGS = {
-  1: {
+  1:  {
     start: 'q0',
-    accept: ['q9'],
+    accept: ['q17'],
+
     nodes: [
-      { id: 'q0',  label: '-', type: 'start',  fx: 0,    fy: 0 },
-      { id: 'qT1', label: 'T', type: 'trap',   fx: 0,    fy: 220 },
-      { id: 'q1',  label: '',  type: 'state',  fx: 200,  fy: 0 },
-      { id: 'q2',  label: '',  type: 'state',  fx: 360,  fy: -110 },
-      { id: 'qT2', label: 'T', type: 'trap',   fx: 360,  fy: -280 },
-      { id: 'q3',  label: '',  type: 'state',  fx: 360,  fy: 110 },
-      { id: 'qT3', label: 'T', type: 'trap',   fx: 360,  fy: 290 },
-      { id: 'q4',  label: '',  type: 'state',  fx: 540,  fy: 60 },
-      { id: 'q5',  label: '',  type: 'state',  fx: 700,  fy: -90 },
-      { id: 'q6',  label: '',  type: 'state',  fx: 860,  fy: 60 },
-      { id: 'q7',  label: '',  type: 'state',  fx: 860,  fy: 220 },
-      { id: 'q8',  label: '',  type: 'state',  fx: 1020, fy: -90 },
-      { id: 'q9',  label: '+', type: 'accept', fx: 1180, fy: 0 }
+      { id: 'q0',   label: '-', type: 'start',  fx: 0,    fy: 0 },
+      { id: 'q1',   label: '',  type: 'state',  fx: 200,  fy: 0 },
+      { id: 'q2',   label: '',  type: 'state',  fx: 380,  fy: -110 },
+      { id: 'q3',   label: '',  type: 'state',  fx: 380,  fy: 110 },
+      { id: 'q4',   label: '',  type: 'state',  fx: 560,  fy: 0 },
+      { id: 'q5',   label: '',  type: 'state',  fx: 720,  fy: -120 },
+      { id: 'q6',   label: '',  type: 'state',  fx: 720,  fy: 140 },
+      { id: 'q7',   label: '',  type: 'state',  fx: 900,  fy: 0 },
+      { id: 'q8',   label: '',  type: 'state',  fx: 1080, fy: 0 },
+      { id: 'q9',   label: '',  type: 'state',  fx: 1260, fy: -120 },
+      { id: 'q10',  label: '',  type: 'state',  fx: 1260, fy: 120 },
+      { id: 'q11',  label: '',  type: 'state',  fx: 1440, fy: 0 },
+      { id: 'q12',  label: '',  type: 'state',  fx: 1620, fy: 0 },
+      { id: 'q13',  label: '',  type: 'state',  fx: 1800, fy: -120 },
+      { id: 'q14',  label: '',  type: 'state',  fx: 1800, fy: 120 },
+      { id: 'q15',  label: '',  type: 'state',  fx: 1980, fy: -120 },
+      { id: 'q16',  label: '',  type: 'state',  fx: 1980, fy: 120 },
+      { id: 'q17',  label: '+', type: 'accept', fx: 2160, fy: 0 },
+      // Separate trap nodes — one per source that goes to trap
+      { id: 'qT_q0',  label: 'T', type: 'trap', fx: 0,    fy: -140 },
+      { id: 'qT_q2',  label: 'T', type: 'trap', fx: 380,  fy: -260 },
+      { id: 'qT_q3',  label: 'T', type: 'trap', fx: 380,  fy: 260 },
+      { id: 'qT_q9',  label: 'T', type: 'trap', fx: 1260, fy: -280 },
+      { id: 'qT_q10', label: 'T', type: 'trap', fx: 1340, fy: 280 },
     ],
+
     links: [
-      { source: 'q0',  target: 'q1',  label: 'b' },
-      { source: 'q0',  target: 'qT1', label: 'a' },
-      { source: 'qT1', target: 'qT1', label: 'a, b' },
-      { source: 'q1',  target: 'q2',  label: 'a' },
-      { source: 'q1',  target: 'q3',  label: 'b' },
-      { source: 'q2',  target: 'q4',  label: 'b' },
-      { source: 'q2',  target: 'qT2', label: 'a' },
-      { source: 'qT2', target: 'qT2', label: 'a, b' },
-      { source: 'q3',  target: 'q4',  label: 'b' },
-      { source: 'q3',  target: 'qT3', label: 'a' },
-      { source: 'qT3', target: 'qT3', label: 'a, b' },
-      { source: 'q4',  target: 'q5',  label: 'a' },
-      { source: 'q4',  target: 'q4',  label: 'b' },
-      { source: 'q5',  target: 'q5',  label: 'a' },
-      { source: 'q5',  target: 'q6',  label: 'b' },
-      { source: 'q6',  target: 'q7',  label: 'a', curve: 10001 },
-      { source: 'q6',  target: 'q4',  label: 'b', curve: 1.4, sweep: 1 },
-      { source: 'q7',  target: 'q5',  label: 'a', curve: 1.3, sweep: 0 },
-      { source: 'q7',  target: 'q8',  label: 'b' },
-      { source: 'q8',  target: 'q5',  label: 'a', curve: 1.4, sweep: 0 },
-      { source: 'q8',  target: 'q9',  label: 'b' },
-      { source: 'q9',  target: 'q9',  label: 'a, b' }
+      { source: 'q0',  target: 'qT_q0',  label: 'a' },
+      { source: 'q0',  target: 'q1',     label: 'b' },
+
+      { source: 'q1',  target: 'q2',     label: 'a' },
+      { source: 'q1',  target: 'q3',     label: 'b' },
+
+      { source: 'q2',  target: 'qT_q2',  label: 'a' },
+      { source: 'q2',  target: 'q4',     label: 'b' },
+
+      { source: 'q3',  target: 'qT_q3',  label: 'a' },
+      { source: 'q3',  target: 'q4',     label: 'b' },
+
+      { source: 'q4',  target: 'q5',     label: 'a' },
+      { source: 'q4',  target: 'q6',     label: 'b' },
+
+      { source: 'q5',  target: 'q5',     label: 'a' },
+      { source: 'q5',  target: 'q7',     label: 'b' },
+
+      { source: 'q6',  target: 'q5',     label: 'a' },
+      { source: 'q6',  target: 'q6',     label: 'b' },
+
+      { source: 'q7',  target: 'q8',     label: 'a' },
+      { source: 'q7',  target: 'q4',     label: 'b' },
+
+      { source: 'q8',  target: 'q9',     label: 'a' },
+      { source: 'q8',  target: 'q11',    label: 'b' },
+
+      { source: 'q9',  target: 'qT_q9',  label: 'a' },
+      { source: 'q9',  target: 'q10',    label: 'b' },
+
+      { source: 'q10', target: 'q8',     label: 'a' },
+      { source: 'q10', target: 'qT_q10', label: 'b' },
+
+      { source: 'q11', target: 'q8',     label: 'a' },
+      { source: 'q11', target: 'q12',    label: 'b' },
+
+      { source: 'q12', target: 'q13',    label: 'a' },
+      { source: 'q12', target: 'q14',    label: 'b' },
+
+      { source: 'q13', target: 'q13',    label: 'a' },
+      { source: 'q13', target: 'q15',    label: 'b' },
+
+      { source: 'q14', target: 'q16',    label: 'a' },
+      { source: 'q14', target: 'q14',    label: 'b' },
+
+      { source: 'q15', target: 'q17',    label: 'a' },
+      { source: 'q15', target: 'q14',    label: 'b' },
+
+      { source: 'q16', target: 'q13',    label: 'a' },
+      { source: 'q16', target: 'q17',    label: 'b' },
+
+      { source: 'q17', target: 'q17',    label: 'a, b' },
+
+      // Trap self-loops
+      { source: 'qT_q0',  target: 'qT_q0',  label: 'a, b' },
+      { source: 'qT_q2',  target: 'qT_q2',  label: 'a, b' },
+      { source: 'qT_q3',  target: 'qT_q3',  label: 'a, b' },
+      { source: 'qT_q9',  target: 'qT_q9',  label: 'a, b' },
+      { source: 'qT_q10', target: 'qT_q10', label: 'a, b' }
     ],
+
     transitions: {
-      q0:  { a: 'qT1', b: 'q1' },
-      qT1: { 'a, b': 'qT1' },
-      q1:  { a: 'q2',  b: 'q3' },
-      q2:  { a: 'qT2', b: 'q4' },
-      qT2: { 'a, b': 'qT2' },
-      q3:  { a: 'qT3', b: 'q4' },
-      qT3: { 'a, b': 'qT3' },
-      q4:  { a: 'q5',  b: 'q4' },
-      q5:  { a: 'q5',  b: 'q6' },
-      q6:  { a: 'q7',  b: 'q4' },
-      q7:  { a: 'q5',  b: 'q8' },
-      q8:  { a: 'q5',  b: 'q9' },
-      q9:  { 'a, b': 'q9' }
+      q0:      { a: 'qT_q0',  b: 'q1' },
+      qT_q0:   { a: 'qT_q0',  b: 'qT_q0' },
+      q1:      { a: 'q2',     b: 'q3' },
+      q2:      { a: 'qT_q2',  b: 'q4' },
+      qT_q2:   { a: 'qT_q2',  b: 'qT_q2' },
+      q3:      { a: 'qT_q3',  b: 'q4' },
+      qT_q3:   { a: 'qT_q3',  b: 'qT_q3' },
+      q4:      { a: 'q5',     b: 'q6' },
+      q5:      { a: 'q5',     b: 'q7' },
+      q6:      { a: 'q5',     b: 'q6' },
+      q7:      { a: 'q8',     b: 'q4' },
+      q8:      { a: 'q9',     b: 'q11' },
+      q9:      { a: 'qT_q9',  b: 'q10' },
+      qT_q9:   { a: 'qT_q9',  b: 'qT_q9' },
+      q10:     { a: 'q8',     b: 'qT_q10' },
+      qT_q10:  { a: 'qT_q10', b: 'qT_q10' },
+      q11:     { a: 'q8',     b: 'q12' },
+      q12:     { a: 'q13',    b: 'q14' },
+      q13:     { a: 'q13',    b: 'q15' },
+      q14:     { a: 'q16',    b: 'q14' },
+      q15:     { a: 'q17',    b: 'q14' },
+      q16:     { a: 'q13',    b: 'q17' },
+      q17:     { 'a, b': 'q17' }
     }
   },
+
   2: {
     start: 'p0',
     accept: ['p10'],
