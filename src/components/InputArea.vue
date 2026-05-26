@@ -7,8 +7,10 @@ const props = defineProps({
 
 const emit = defineEmits(['simulate-string'])
 
-const inputVal  = ref('')
+const ROW_COUNT = 5
+const inputVals = ref(Array(ROW_COUNT).fill(''))
 const history   = ref([])
+const activeIdx = ref(null)
 
 // ── Suggestions per problem regex signature ──────────────────
 const P1_SUGGESTIONS = {
@@ -25,23 +27,27 @@ const suggestions = computed(() => {
   return props.regexStr.includes('bab') ? P1_SUGGESTIONS : P2_SUGGESTIONS
 })
 
-// ── Real-time validity ────────────────────────────────────────
-const validity = computed(() => {
-  if (!inputVal.value || !props.regexStr) return null
+// ── Real-time validity per row ────────────────────────────────
+const checkValidity = (val) => {
+  if (!val || !props.regexStr) return null
   try {
     const jsRegex = new RegExp('^(?:' + props.regexStr.split('+').join('|') + ')$')
-    return jsRegex.test(inputVal.value) ? 'valid' : 'invalid'
+    return jsRegex.test(val) ? 'valid' : 'invalid'
   } catch {
     return null
   }
-})
+}
 
-// ── Char preview ──────────────────────────────────────────────
-const chars = computed(() => inputVal.value === '' ? [] : inputVal.value.split(''))
+const validities = computed(() => inputVals.value.map(checkValidity))
+
+// ── Char preview for focused row ──────────────────────────────
+const activeChars = computed(() =>
+  activeIdx.value !== null ? inputVals.value[activeIdx.value].split('') : []
+)
 
 // ── Run ───────────────────────────────────────────────────────
-const run = (str) => {
-  const s = str ?? inputVal.value
+const run = (idx, str) => {
+  const s = str ?? inputVals.value[idx]
   if (s === '') return
   emit('simulate-string', s)
   if (!history.value.find(h => h.str === s)) {
@@ -50,53 +56,62 @@ const run = (str) => {
   }
 }
 
-const onEnter = () => run()
-
 const useSuggestion = (s) => {
-  inputVal.value = s
-  run(s)
+  const emptyIdx = inputVals.value.findIndex(v => v === '')
+  const target = emptyIdx !== -1 ? emptyIdx : 0
+  inputVals.value[target] = s
+  run(target, s)
 }
 
 const clearHistory = () => { history.value = [] }
 
 watch(() => props.regexStr, () => {
-  inputVal.value = ''
-  history.value  = []
+  inputVals.value = Array(ROW_COUNT).fill('')
+  history.value   = []
 })
 </script>
 
 <template>
   <div class="ia-root">
 
-    <!-- Input row -->
-    <div class="ia-input-row">
-      <div :class="['ia-input-wrap', validity ? 'ia-wrap-' + validity : '']">
-        <input
-          v-model="inputVal"
-          class="ia-input"
-          placeholder="Enter string…"
-          spellcheck="false"
-          autocomplete="off"
-          @keydown.enter="onEnter"
-        />
-        <span v-if="validity" :class="['ia-validity-text', validity]">{{ validity.toUpperCase() }}</span>
+    <!-- 5 Input rows -->
+    <div class="ia-rows">
+      <div
+        v-for="(_, i) in inputVals"
+        :key="i"
+        class="ia-input-row"
+      >
+        <span class="ia-row-num">{{ i + 1 }}</span>
+        <div :class="['ia-input-wrap', validities[i] ? 'ia-wrap-' + validities[i] : '']">
+          <input
+            v-model="inputVals[i]"
+            class="ia-input"
+            placeholder="Enter string…"
+            spellcheck="false"
+            autocomplete="off"
+            @focus="activeIdx = i"
+            @blur="activeIdx = null"
+            @keydown.enter="run(i)"
+          />
+          <span v-if="validities[i]" :class="['ia-validity-text', validities[i]]">{{ validities[i].toUpperCase() }}</span>
+        </div>
+        <button class="ia-run-btn" title="Simulate (Enter)" @click="run(i)">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <polygon points="2,1 11,6 2,11" fill="currentColor"/>
+          </svg>
+          Run
+        </button>
       </div>
-      <button class="ia-run-btn" title="Simulate (Enter)" @click="run()">
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <polygon points="2,1 11,6 2,11" fill="currentColor"/>
-        </svg>
-        Run
-      </button>
     </div>
 
-    <!-- Char tape -->
-    <div v-if="chars.length" class="ia-chars">
+    <!-- Char tape for focused row -->
+    <div v-if="activeChars.length" class="ia-chars">
       <span
-        v-for="(c, i) in chars"
+        v-for="(c, i) in activeChars"
         :key="i"
-        :class="['ia-char', validity === 'invalid' ? 'ia-char-invalid' : '']"
+        :class="['ia-char', validities[activeIdx] === 'invalid' ? 'ia-char-invalid' : '']"
       >{{ c }}</span>
-      <span class="ia-char-count">{{ chars.length }} char{{ chars.length !== 1 ? 's' : '' }}</span>
+      <span class="ia-char-count">{{ activeChars.length }} char{{ activeChars.length !== 1 ? 's' : '' }}</span>
     </div>
 
     <!-- Suggestions -->
@@ -136,7 +151,7 @@ watch(() => props.regexStr, () => {
           class="ia-hist-row"
         >
           <code class="ia-hist-str">{{ item.str }}</code>
-          <button class="ia-rerun-btn" title="Re-run" @click="run(item.str)">
+          <button class="ia-rerun-btn" title="Re-run" @click="run(0, item.str)">
             <svg width="9" height="9" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <polygon points="2,1 11,6 2,11" fill="currentColor"/>
             </svg>
@@ -155,11 +170,27 @@ watch(() => props.regexStr, () => {
   gap: 10px;
 }
 
-/* Input row */
+/* Input rows */
+.ia-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .ia-input-row {
   display: flex;
   align-items: stretch;
   gap: 7px;
+}
+.ia-row-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #b0b8c1;
+  flex-shrink: 0;
+  user-select: none;
 }
 .ia-input-wrap {
   flex: 1;
