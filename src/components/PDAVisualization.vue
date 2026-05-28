@@ -20,72 +20,102 @@ const DW = 28, DH = 20   // diamond half-dims
 const PDA_CONFIGS = {
   // ── Problem 2  (R states, binary alphabet) ──────────────────────────────
   2: {
-    nodes: [
-      { id: 'START', label: 'START',  type: 'start',  x: 200,  y:  60 },
-      { id: 'ACCEPT',label: 'ACCEPT', type: 'accept', x:1100,  y: 860 },
-      { id: 'rj1',  label: 'REJECT', type: 'reject', x:  50,  y: 160 },
-      { id: 'rj2',  label: 'REJECT', type: 'reject', x: 380,  y:  60 },
-      { id: 'rj3',  label: 'REJECT', type: 'reject', x:  50,  y: 300 },
-      { id: 'rj4',  label: 'REJECT', type: 'reject', x: 560,  y: 300 },
-      { id: 'rj5',  label: 'REJECT', type: 'reject', x:  50,  y: 440 },
-      { id: 'rj6',  label: 'REJECT', type: 'reject', x: 360,  y: 530 },
-      { id: 'rj7',  label: 'REJECT', type: 'reject', x: 620,  y: 360 },
-      { id: 'rj8',  label: 'REJECT', type: 'reject', x: 280,  y: 580 },
-      { id: 'rj9',  label: 'REJECT', type: 'reject', x: 780,  y: 360 },
-      { id: 'rj10', label: 'REJECT', type: 'reject', x: 660,  y: 580 },
-      { id: 'R1',  label: 'READ', type: 'state', x: 200,  y: 160 },
-      { id: 'R2',  label: 'READ', type: 'state', x: 380,  y: 160 },
-      { id: 'R3',  label: 'READ', type: 'state', x: 200,  y: 300 },
-      { id: 'R4',  label: 'READ', type: 'state', x: 380,  y: 300 },
-      { id: 'R5',  label: 'READ', type: 'state', x: 200,  y: 440 },
-      { id: 'R6',  label: 'READ', type: 'state', x: 460,  y: 440 },
-      { id: 'R7',  label: 'READ', type: 'state', x: 620,  y: 440 },
-      { id: 'R8',  label: 'READ', type: 'state', x: 460,  y: 580 },
-      { id: 'R9',  label: 'READ', type: 'state', x: 780,  y: 440 },
-      { id: 'R10', label: 'READ', type: 'state', x: 780,  y: 580 },
-      { id: 'R11', label: 'READ', type: 'state', x: 780,  y: 720 },
-      { id: 'R12', label: 'READ', type: 'state', x: 940,  y: 440 },
-      { id: 'R13', label: 'READ', type: 'state', x: 940,  y: 720 },
-    ],
-    links: [
-      { src: 'START', tgt: 'R1',  label: '' },
-      { src: 'R1',  tgt: 'rj1',  label: 'Δ' },
-      { src: 'R1',  tgt: 'R2',   label: '1' },
-      { src: 'R1',  tgt: 'R3',   label: '0' },
-      { src: 'R2',  tgt: 'rj2',  label: 'Δ' },
-      { src: 'R2',  tgt: 'R2',   label: '1' },
-      { src: 'R2',  tgt: 'R4',   label: '0' },
-      { src: 'R3',  tgt: 'rj3',  label: 'Δ' },
-      { src: 'R3',  tgt: 'R6',   label: '1' },
-      { src: 'R3',  tgt: 'R5',   label: '0' },
-      { src: 'R4',  tgt: 'R5',   label: '0' },
-      { src: 'R4',  tgt: 'rj4',  label: 'Δ' },
-      { src: 'R4',  tgt: 'R6',   label: '1' },
-      { src: 'R5',  tgt: 'rj5',  label: 'Δ' },
-      { src: 'R5',  tgt: 'R6',   label: '0,1' },
-      { src: 'R6',  tgt: 'rj6',  label: 'Δ' },
-      { src: 'R6',  tgt: 'R7',   label: '1' },
-      { src: 'R6',  tgt: 'R8',   label: '0' },
-      { src: 'R7',  tgt: 'rj7',  label: 'Δ' },
-      { src: 'R7',  tgt: 'R9',   label: '1' },
-      { src: 'R7',  tgt: 'R10',  label: '0' },
-      { src: 'R8',  tgt: 'rj8',  label: 'Δ' },
-      { src: 'R8',  tgt: 'R11',  label: '0' },
-      { src: 'R8',  tgt: 'R7',   label: '1' },
-      { src: 'R9',  tgt: 'rj9',  label: 'Δ' },
-      { src: 'R9',  tgt: 'R12',  label: '1' },
-      { src: 'R9',  tgt: 'R7',   label: '0', sweep: 1 },
-      { src: 'R10', tgt: 'rj10', label: 'Δ' },
-      { src: 'R10', tgt: 'R12',  label: '1' },
-      { src: 'R11', tgt: 'R13',  label: '0', curve: 1.4, sweep: 1 },
-      { src: 'R11', tgt: 'R12',  label: '1' },
-      { src: 'R11', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
-      { src: 'R12', tgt: 'R13',  label: '0,1', curve: 10001 },
-      { src: 'R12', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
-      { src: 'R13', tgt: 'R13',  label: '0,1' },
-      { src: 'R13', tgt: 'ACCEPT',label: 'Δ',  curve: 10001 },
-    ]
-  },
+  nodes: [
+    { id: 'START',  label: 'START',  type: 'start',  x:   60, y: 360 },
+    { id: 'ACCEPT', label: 'ACCEPT', type: 'accept', x: 1660, y: 360 },
+
+    // Reject nodes
+    { id: 'rjP0',  label: 'REJECT', type: 'reject', x:  220, y: 120 },
+    { id: 'rjP1',  label: 'REJECT', type: 'reject', x:  380, y: 120 },
+    { id: 'rjP2',  label: 'REJECT', type: 'reject', x:  380, y: 620 },
+    { id: 'rjP3',  label: 'REJECT', type: 'reject', x:  540, y: 120 },
+    { id: 'rjP4',  label: 'REJECT', type: 'reject', x:  540, y: 620 },
+    { id: 'rjP5',  label: 'REJECT', type: 'reject', x:  700, y: 120 },
+    { id: 'rjP6',  label: 'REJECT', type: 'reject', x:  860, y: 120 },
+    { id: 'rjP7',  label: 'REJECT', type: 'reject', x:  860, y: 620 },
+    { id: 'rjP8',  label: 'REJECT', type: 'reject', x: 1020, y: 120 },
+    { id: 'rjP9',  label: 'REJECT', type: 'reject', x: 1020, y: 620 },
+    { id: 'rjP10', label: 'REJECT', type: 'reject', x: 1340, y: 120 },
+
+    // PDA states
+    { id: 'p0',  label: 'READ', type: 'state', x:  220, y: 360 },
+
+    { id: 'p1',  label: 'READ', type: 'state', x:  380, y: 240 },
+    { id: 'p2',  label: 'READ', type: 'state', x:  380, y: 480 },
+
+    { id: 'p3',  label: 'READ', type: 'state', x:  540, y: 240 },
+    { id: 'p4',  label: 'READ', type: 'state', x:  540, y: 480 },
+
+    { id: 'p5',  label: 'READ', type: 'state', x:  700, y: 360 },
+
+    { id: 'p6',  label: 'READ', type: 'state', x:  860, y: 240 },
+    { id: 'p7',  label: 'READ', type: 'state', x:  860, y: 480 },
+
+    { id: 'p8',  label: 'READ', type: 'state', x: 1020, y: 240 },
+    { id: 'p9',  label: 'READ', type: 'state', x: 1020, y: 480 },
+
+    { id: 'p10', label: 'READ', type: 'state', x: 1340, y: 360 },
+  ],
+
+  links: [
+    { src: 'START', tgt: 'p0' },
+
+    // p0
+    { src: 'p0',  tgt: 'p1',   label: '0' },
+    { src: 'p0',  tgt: 'p2',   label: '1' },
+    { src: 'p0',  tgt: 'rjP0', label: 'Δ' },
+
+    // p1
+    { src: 'p1',  tgt: 'p4',   label: '0' },
+    { src: 'p1',  tgt: 'p5',   label: '1' },
+    { src: 'p1',  tgt: 'rjP1', label: 'Δ' },
+
+    // p2
+    { src: 'p2',  tgt: 'p3',   label: '0' },
+    { src: 'p2',  tgt: 'p2',   label: '1' },
+    { src: 'p2',  tgt: 'rjP2', label: 'Δ' },
+
+    // p3
+    { src: 'p3',  tgt: 'p1',   label: '0' },
+    { src: 'p3',  tgt: 'p5',   label: '1' },
+    { src: 'p3',  tgt: 'rjP3', label: 'Δ' },
+
+    // p4
+    { src: 'p4',  tgt: 'p5',   label: '0' },
+    { src: 'p4',  tgt: 'p2',   label: '1' },
+    { src: 'p4',  tgt: 'rjP4', label: 'Δ' },
+
+    // p5
+    { src: 'p5',  tgt: 'p6',   label: '0' },
+    { src: 'p5',  tgt: 'p7',   label: '1' },
+    { src: 'p5',  tgt: 'rjP5', label: 'Δ' },
+
+    // p6
+    { src: 'p6',  tgt: 'p10',  label: '0' },
+    { src: 'p6',  tgt: 'p7',   label: '1' },
+    { src: 'p6',  tgt: 'rjP6', label: 'Δ' },
+
+    // p7
+    { src: 'p7',  tgt: 'p8',   label: '0' },
+    { src: 'p7',  tgt: 'p9',   label: '1' },
+    { src: 'p7',  tgt: 'rjP7', label: 'Δ' },
+
+    // p8
+    { src: 'p8',  tgt: 'p6',   label: '0' },
+    { src: 'p8',  tgt: 'p10',  label: '1' },
+    { src: 'p8',  tgt: 'rjP8', label: 'Δ' },
+
+    // p9
+    { src: 'p9',  tgt: 'p6',   label: '0' },
+    { src: 'p9',  tgt: 'p10',  label: '1' },
+    { src: 'p9',  tgt: 'rjP9', label: 'Δ' },
+
+    // p10
+    { src: 'p10', tgt: 'p10',   label: '0,1' },
+    { src: 'p10', tgt: 'ACCEPT', label: 'Δ' },
+    { src: 'p10', tgt: 'rjP10',  label: 'other' },
+  ]
+},
 
   // ── Problem 1  (S states, a/b alphabet) ─────────────────────────────────
   1: {
