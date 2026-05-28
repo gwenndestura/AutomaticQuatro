@@ -35,7 +35,6 @@ const PDA_CONFIGS = {
     { id: 'rjP7',  label: 'REJECT', type: 'reject', x:  860, y: 620 },
     { id: 'rjP8',  label: 'REJECT', type: 'reject', x: 1020, y: 120 },
     { id: 'rjP9',  label: 'REJECT', type: 'reject', x: 1020, y: 620 },
-    { id: 'rjP10', label: 'REJECT', type: 'reject', x: 1340, y: 120 },
 
     // PDA states
     { id: 'p0',  label: 'READ', type: 'state', x:  220, y: 360 },
@@ -54,7 +53,7 @@ const PDA_CONFIGS = {
     { id: 'p8',  label: 'READ', type: 'state', x: 1020, y: 240 },
     { id: 'p9',  label: 'READ', type: 'state', x: 1020, y: 480 },
 
-    { id: 'p10', label: 'READ', type: 'state', x: 1340, y: 360 },
+    { id: 'p10',   label: 'READ',   type: 'state',  x: 1340, y: 360 },
   ],
 
   links: [
@@ -113,7 +112,6 @@ const PDA_CONFIGS = {
     // p10
     { src: 'p10', tgt: 'p10',   label: '0,1' },
     { src: 'p10', tgt: 'ACCEPT', label: 'Δ' },
-    { src: 'p10', tgt: 'rjP10',  label: 'other' },
   ]
 },
 
@@ -433,7 +431,10 @@ const buildPath = (input) => {
     if (!matched) {
       for (const t of avail) {
         const parts = (t.label ?? '').split(',').map(s => s.trim())
-        if (parts.includes('Δ') || parts.includes('')) { matched = t; break }
+        if (parts.includes('Δ') || parts.includes('')) {
+          if (t.tgt === 'ACCEPT' && char !== null) continue
+          matched = t; break
+        }
       }
     }
 
